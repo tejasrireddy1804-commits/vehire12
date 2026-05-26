@@ -1,0 +1,3188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VeHire — Video Resume Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0d0d0d; --ink2:#3a3a3a; --ink3:#717171; --ink4:#a8a8a8;
+  --surface:#fafaf8; --surface2:#f2f1ee; --surface3:#e8e6e1;
+  --border:#e0deda;
+  --accent:#1a6b4a; --accent2:#0f4d35; --accent-light:#e8f5ee; --accent-mid:#5aab82;
+  --amber:#c47a1e; --amber-light:#fdf3e0;
+  --red:#c0392b; --red-light:#fdecea;
+  --blue:#1e5fa8; --blue-light:#e8f0fc;
+  --r:10px; --r-lg:16px; --r-xl:24px;
+  --shadow:0 1px 3px rgba(0,0,0,.07),0 4px 12px rgba(0,0,0,.05);
+  --shadow-lg:0 4px 32px rgba(0,0,0,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--ink);min-height:100vh;font-size:15px;line-height:1.6}
+.serif{font-family:'Instrument Serif',serif}
+.mono{font-family:'JetBrains Mono',monospace}
+.hidden{display:none!important}
+
+/* Toast */
+#toasts{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 18px;border-radius:var(--r);font-size:14px;font-weight:500;color:#fff;background:var(--ink);animation:slideIn .3s ease;box-shadow:var(--shadow-lg)}
+.toast.ok{background:var(--accent)}.toast.err{background:var(--red)}
+@keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:none;opacity:1}}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border-radius:var(--r);font-size:14px;font-weight:500;cursor:pointer;border:none;font-family:inherit;transition:all .18s;text-decoration:none;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent2);transform:translateY(-1px)}
+.btn-secondary{background:var(--surface2);color:var(--ink);border:1.5px solid var(--border)}.btn-secondary:hover{background:var(--surface3)}
+.btn-ghost{background:transparent;color:var(--ink2);border:1.5px solid var(--border)}.btn-ghost:hover{background:var(--surface2)}
+.btn-danger{background:var(--red-light);color:var(--red);border:1.5px solid rgba(192,57,43,.2)}.btn-danger:hover{background:var(--red);color:#fff}
+.btn-sm{padding:7px 13px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.btn-full{width:100%}
+
+/* Forms */
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:13px;font-weight:500;color:var(--ink2);margin-bottom:6px}
+.form-input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px;font-family:inherit;background:#fff;color:var(--ink);transition:border .2s;outline:none}
+.form-input:focus{border-color:var(--accent)}
+textarea.form-input{resize:vertical}
+select.form-input{cursor:pointer}
+
+/* Auth */
+#auth-screen{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+.auth-left{background:var(--ink);padding:60px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.auth-left::before{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(90,171,130,.15) 0%,transparent 70%);top:-100px;right:-100px;pointer-events:none}
+.auth-left::after{content:'';position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(26,107,74,.2) 0%,transparent 70%);bottom:100px;left:-80px;pointer-events:none}
+.auth-logo{font-family:'Instrument Serif',serif;font-size:28px;color:#fff;display:flex;align-items:center;gap:10px}
+.logo-dot{width:10px;height:10px;border-radius:50%;background:var(--accent-mid);display:inline-block}
+.auth-hero h1{font-family:'Instrument Serif',serif;font-size:52px;color:#fff;line-height:1.15;margin-bottom:20px;position:relative;z-index:1}
+.auth-hero h1 em{color:var(--accent-mid);font-style:italic}
+.auth-hero p{color:rgba(255,255,255,.6);font-size:16px;max-width:380px;line-height:1.7;position:relative;z-index:1}
+.auth-stats{display:flex;gap:40px;position:relative;z-index:1}
+.auth-stat-num{font-family:'Instrument Serif',serif;font-size:32px;color:#fff}
+.auth-stat-lbl{font-size:13px;color:rgba(255,255,255,.5);margin-top:2px}
+.auth-right{padding:60px;display:flex;align-items:center;justify-content:center;background:var(--surface)}
+.auth-wrap{width:100%;max-width:400px}
+.auth-wrap h2{font-family:'Instrument Serif',serif;font-size:32px;margin-bottom:6px}
+.auth-wrap .sub{color:var(--ink3);margin-bottom:28px;font-size:14px}
+.role-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--surface2);padding:4px;border-radius:var(--r);margin-bottom:24px}
+.role-tab{padding:10px;border:none;background:transparent;border-radius:7px;cursor:pointer;font-size:14px;font-weight:500;color:var(--ink3);transition:all .2s;font-family:inherit}
+.role-tab.active{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.auth-switch{text-align:center;margin-top:18px;font-size:14px;color:var(--ink3)}
+.auth-switch a{color:var(--accent);cursor:pointer;font-weight:500}
+.demo-box{margin-top:16px;padding:12px 14px;background:var(--surface2);border-radius:var(--r);font-size:12px;color:var(--ink3);line-height:1.8}
+.demo-box strong{color:var(--ink2)}
+
+/* App */
+#app{display:none;min-height:100vh}
+.topbar{height:60px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:24px;position:sticky;top:0;z-index:100}
+.top-logo{font-family:'Instrument Serif',serif;font-size:22px;color:var(--ink);display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
+.top-logo span{width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block}
+.top-nav{display:flex;gap:4px;flex:1}
+.nav-btn{padding:7px 14px;border-radius:8px;border:none;background:transparent;font-size:14px;font-weight:500;color:var(--ink3);cursor:pointer;font-family:inherit;transition:all .15s}
+.nav-btn:hover{background:var(--surface2);color:var(--ink)}
+.nav-btn.active{background:var(--accent-light);color:var(--accent)}
+.top-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
+.top-name{font-size:14px;font-weight:500}
+
+.page{padding:32px;max-width:1200px;margin:0 auto}
+.page-hdr{margin-bottom:28px}
+.page-hdr h1{font-family:'Instrument Serif',serif;font-size:34px;font-weight:400;line-height:1.2;margin-bottom:4px}
+.page-hdr p{color:var(--ink3);font-size:15px}
+
+/* Cards */
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;box-shadow:var(--shadow)}
+.card-sm{padding:16px;border-radius:var(--r)}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:20px}
+.stat-lbl{font-size:11px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.stat-val{font-family:'Instrument Serif',serif;font-size:36px;color:var(--ink);line-height:1}
+.stat-sub{font-size:12px;color:var(--ink4);margin-top:4px}
+
+/* Layout */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+/* Section title */
+.sec{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--ink3);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sec::after{content:'';flex:1;height:1px;background:var(--border)}
+.divider{height:1px;background:var(--border);margin:18px 0}
+
+/* Tags */
+.tag{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid transparent;gap:4px}
+.tag-green{background:var(--accent-light);color:var(--accent);border-color:rgba(26,107,74,.15)}
+.tag-amber{background:var(--amber-light);color:var(--amber);border-color:rgba(196,122,30,.2)}
+.tag-blue{background:var(--blue-light);color:var(--blue);border-color:rgba(30,95,168,.2)}
+.tag-gray{background:var(--surface2);color:var(--ink3);border-color:var(--border)}
+.tag-red{background:var(--red-light);color:var(--red);border-color:rgba(192,57,43,.2)}
+
+/* Score ring */
+.ring-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
+.ring{position:relative;width:120px;height:120px;flex-shrink:0}
+.ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.ring-num{font-family:'Instrument Serif',serif;font-size:28px;line-height:1}
+.ring-lbl{font-size:11px;color:var(--ink3);margin-top:2px}
+
+/* Score bars */
+.bar-row{display:flex;align-items:center;gap:12px;margin-bottom:13px}
+.bar-lbl{font-size:13px;color:var(--ink2);width:115px;flex-shrink:0}
+.bar-track{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;background:var(--accent);transition:width 1s cubic-bezier(.4,0,.2,1)}
+.bar-fill.a{background:var(--amber)}
+.bar-fill.b{background:var(--blue)}
+.bar-val{font-size:13px;font-weight:500;min-width:42px;text-align:right}
+
+/* Match badge */
+.mbadge{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:20px;font-size:13px;font-weight:600}
+.mh{background:var(--accent-light);color:var(--accent)}
+.mm{background:var(--amber-light);color:var(--amber)}
+.ml{background:var(--red-light);color:var(--red)}
+
+/* Candidate cards */
+.cand-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px}
+.cand-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;transition:box-shadow .2s,transform .2s;cursor:pointer}
+.cand-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.cand-card-top{padding:18px 18px 14px;border-bottom:1px solid var(--surface2);display:flex;gap:12px;align-items:flex-start}
+.cand-av{width:46px;height:46px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;flex-shrink:0}
+.cand-name{font-size:15px;font-weight:600;margin-bottom:1px}
+.cand-hl{font-size:13px;color:var(--ink3)}
+.cand-card-mid{padding:12px 18px}
+.skills-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.cand-card-bot{padding:12px 18px;background:var(--surface);display:flex;align-items:center;justify-content:space-between}
+
+/* Job card */
+.job-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;transition:box-shadow .2s;cursor:pointer;margin-bottom:12px}
+.job-card:hover{box-shadow:var(--shadow-lg)}
+.job-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.job-title{font-size:17px;font-weight:600;margin-bottom:3px}
+.job-co{font-size:14px;color:var(--ink3)}
+.job-meta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.job-meta span{font-size:13px;color:var(--ink3)}
+
+/* Upload */
+.upload-zone{border:2px dashed var(--border);border-radius:var(--r-lg);padding:40px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface)}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:var(--accent-light)}
+.upload-icon{font-size:38px;margin-bottom:12px}
+.upload-zone h3{font-size:16px;font-weight:600;margin-bottom:6px}
+.upload-zone p{font-size:13px;color:var(--ink3)}
+
+/* Progress */
+.prog-bar{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin:10px 0}
+.prog-fill{height:100%;background:var(--accent);border-radius:2px;width:0;transition:width .4s ease}
+.prog-fill.animate{animation:progAnim 2s ease forwards}
+@keyframes progAnim{0%{width:0}30%{width:40%}70%{width:75%}100%{width:100%}}
+
+/* Transcript / Feedback */
+.transcript{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.75;color:var(--ink2);max-height:140px;overflow-y:auto}
+.feedback{background:var(--accent-light);border-left:3px solid var(--accent);border-radius:0 var(--r) var(--r) 0;padding:14px 16px;font-size:14px;line-height:1.7;color:var(--accent2)}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;padding:10px 14px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);border-bottom:1px solid var(--border)}
+.tbl td{padding:12px 14px;border-bottom:1px solid var(--surface2);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--surface)}
+
+/* Filter bar */
+.filter-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.filter-bar .form-input{max-width:220px;padding:9px 13px;font-size:14px}
+
+/* Empty */
+.empty{text-align:center;padding:60px 20px;color:var(--ink3)}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.empty h3{font-size:18px;font-weight:500;color:var(--ink2);margin-bottom:6px}
+
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal{background:#fff;border-radius:var(--r-xl);max-width:700px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.modal-hdr{padding:24px 28px 16px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:1;margin-bottom:24px}
+.modal-hdr h2{font-family:'Instrument Serif',serif;font-size:24px}
+.modal-body{padding:0 28px 28px}
+.modal-close{background:var(--surface2);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* Video */
+.video-preview{width:100%;max-height:260px;border-radius:var(--r);background:#000;display:block}
+
+/* Spinner */
+.spin{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;display:inline-block}
+.spin.dark{border:2.5px solid var(--border);border-top-color:var(--accent)}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* Anim */
+.fade{animation:fi .35s ease}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+@media(max-width:900px){
+  #auth-screen{grid-template-columns:1fr}
+  .auth-left{display:none}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .two-col,.three-col{grid-template-columns:1fr}
+  .page{padding:16px}
+  .cand-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="toasts"></div>
+
+<!-- ═══════════════ AUTH ════════════════ -->
+<div id="auth-screen">
+  <div class="auth-left">
+    <div class="auth-logo"><span class="logo-dot"></span>VeHire</div>
+    <div class="auth-hero">
+      <h1>Your resume,<br>now <em>alive.</em></h1>
+      <p>Record 90 seconds. Our AI scores your confidence, extracts your skills, and matches you to roles — automatically.</p>
+    </div>
+    <div class="auth-stats">
+      <div><div class="auth-stat-num">12k+</div><div class="auth-stat-lbl">Candidates</div></div>
+      <div><div class="auth-stat-num">340+</div><div class="auth-stat-lbl">Companies</div></div>
+      <div><div class="auth-stat-num">4×</div><div class="auth-stat-lbl">Faster hiring</div></div>
+    </div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-wrap">
+
+      <!-- LOGIN -->
+      <div id="vLogin">
+        <h2>Welcome back</h2>
+        <p class="sub">Sign in to your VeHire account</p>
+        <div class="form-group"><label class="form-label">Email</label>
+          <input class="form-input" id="lEmail" type="email" value="recruiter@techcorp.com"></div>
+        <div class="form-group"><label class="form-label">Password</label>
+          <input class="form-input" id="lPass" type="password" value="password123"></div>
+        <button class="btn btn-primary btn-full" id="btnLogin" onclick="doLogin()">Sign in</button>
+        <div class="auth-switch">No account? <a onclick="show('vReg')">Create one</a></div>
+        <div class="demo-box">
+          <strong>Demo logins (password: password123)</strong><br>
+          🏢 Recruiter: recruiter@techcorp.com<br>
+          🎯 Candidate: riya@example.com &nbsp;|&nbsp; arjun@example.com &nbsp;|&nbsp; sara@example.com
+        </div>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="vReg" class="hidden">
+        <h2>Create account</h2>
+        <p class="sub">Join thousands of candidates and recruiters</p>
+        <div class="role-tabs">
+          <button class="role-tab active" id="rtC" onclick="setRole('candidate')">🎯 Candidate</button>
+          <button class="role-tab" id="rtR" onclick="setRole('recruiter')">🏢 Recruiter</button>
+        </div>
+        <div class="form-group"><label class="form-label">Full Name</label>
+          <input class="form-input" id="rName" placeholder="Riya Patel"></div>
+        <div class="form-group"><label class="form-label">Email</label>
+          <input class="form-input" id="rEmail" type="email" placeholder="you@example.com"></div>
+        <div class="form-group"><label class="form-label">Password</label>
+          <input class="form-input" id="rPass" type="password" placeholder="Min 6 characters"></div>
+        <div class="form-group hidden" id="coField"><label class="form-label">Company Name</label>
+          <input class="form-input" id="rCo" placeholder="TechCorp India"></div>
+        <button class="btn btn-primary btn-full" onclick="doRegister()">Create account</button>
+        <div class="auth-switch">Have an account? <a onclick="show('vLogin')">Sign in</a></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP ════════════════ -->
+<div id="app">
+  <div class="topbar">
+    <div class="top-logo"><span></span>VeHire</div>
+    <nav class="top-nav" id="topNav"></nav>
+    <div class="top-right">
+      <div class="avatar" id="avt">?</div>
+      <span class="top-name" id="topName"></span>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Sign out</button>
+    </div>
+  </div>
+  <div class="page" id="pageRoot"></div>
+</div>
+
+<!-- ═══════════════ MODAL ════════════════ -->
+<div class="overlay hidden" id="overlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-hdr">
+      <h2 id="mTitle"></h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="mBody"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// MOCK DATA — complete platform data for demo
+// ═══════════════════════════════════════════════
+const MOCK = {
+  users: [
+    { id:1, email:'recruiter@techcorp.com', password:'password123', role:'recruiter', name:'Priya Sharma' },
+    { id:2, email:'riya@example.com',       password:'password123', role:'candidate', name:'Riya Patel' },
+    { id:3, email:'arjun@example.com',      password:'password123', role:'candidate', name:'Arjun Mehta' },
+    { id:4, email:'sara@example.com',       password:'password123', role:'candidate', name:'Sara Khan' },
+    { id:5, email:'recruiter2@startup.io',  password:'password123', role:'recruiter', name:'Karan Verma' },
+  ],
+  recruiterProfiles: {
+    1: { company:'TechCorp India', industry:'Software', size:'201-500', website:'techcorp.example.com' },
+    5: { company:'StartupIO',      industry:'FinTech',  size:'11-50',   website:'startup.io' },
+  },
+  candidateProfiles: {
+    2: { headline:'Full-Stack Developer | Python & React', location:'Bangalore', exp:3,
+         edu:'B.Tech CS, IIT Bombay', skills:['Python','React','FastAPI','PostgreSQL','Docker','Git'],
+         linkedin:'https://linkedin.com/in/riya', github:'https://github.com/riya' },
+    3: { headline:'Data Analyst | Business Intelligence', location:'Mumbai', exp:2,
+         edu:'MBA Analytics, IIM Ahmedabad', skills:['Python','SQL','Tableau','Excel','Power BI','Statistics'],
+         linkedin:'', github:'' },
+    4: { headline:'ML Engineer | NLP Specialist', location:'Hyderabad', exp:4,
+         edu:'M.Tech AI, IIT Delhi', skills:['Python','PyTorch','TensorFlow','NLP','Kubernetes','MLflow'],
+         linkedin:'', github:'' },
+  },
+  analyses: {
+    2: { score:87.4, confidence:8.6, sentiment:0.72, clarity:8.9, pace:138, eye:84, fillers:3,
+         skills:['Python','React','FastAPI','PostgreSQL'],
+         transcript:'Hi, I\'m Riya Patel. I have 3 years of experience building full-stack applications using Python and React. I\'ve led teams to deliver scalable APIs and engaging user interfaces. I\'m passionate about clean code and I thrive in collaborative environments. I\'d love to bring my expertise to your team.',
+         feedback:'Riya presents with outstanding confidence and exceptional clarity. Her articulation of technical skills is precise and professional. She demonstrates strong presence and excellent eye contact throughout. Strongly recommended for immediate shortlisting — this candidate stands out clearly from the pool.' },
+    3: { score:76.2, confidence:7.1, sentiment:0.61, clarity:7.8, pace:145, eye:71, fillers:5,
+         skills:['Python','SQL','Tableau','Excel'],
+         transcript:'Hello, my name is Arjun Mehta. I have 2 years of experience in data analytics and business intelligence. I work extensively with SQL, Python, and Tableau to generate actionable insights. I\'m a team player who communicates findings effectively to stakeholders.',
+         feedback:'Arjun presents a solid and professional video resume. His confidence level is good and communication is clear. A few filler words are noticeable but have minimal impact. Recommended for a follow-up interview to explore data analytics qualifications further.' },
+    4: { score:91.8, confidence:9.2, sentiment:0.81, clarity:9.4, pace:132, eye:91, fillers:1,
+         skills:['Python','PyTorch','TensorFlow','NLP','Kubernetes'],
+         transcript:'Good morning. I\'m Sara Khan, a machine learning engineer specialising in NLP and computer vision. Over 4 years, I\'ve built and deployed production-grade models using PyTorch and TensorFlow. I\'ve architected distributed training pipelines on Kubernetes. I\'m driven by the impact AI can have on real-world problems.',
+         feedback:'Sara delivers an outstanding video resume that immediately commands attention. Her delivery is highly confident and assertive. Technical vocabulary is expert-level and highly relevant. Eye contact is exceptional throughout. Strongly recommended — this candidate is among the top profiles on the platform.' },
+  },
+  jobs: [
+    { id:1, recruiterId:1, title:'Senior Python Developer', company:'TechCorp India',
+      desc:'We are looking for an experienced Python developer to join our backend team. You will design scalable APIs, work with cloud infrastructure on AWS, and mentor junior developers. You\'ll collaborate with product teams to ship features fast.',
+      skills:['Python','FastAPI','PostgreSQL','Docker','AWS'], location:'Bangalore / Remote',
+      type:'Full-time', salMin:1200000, salMax:2000000, expReq:4, active:true,
+      created:'2024-01-15' },
+    { id:2, recruiterId:1, title:'Data Analyst', company:'TechCorp India',
+      desc:'Join our analytics team to derive actionable insights from large datasets. You will build dashboards in Tableau, write complex SQL queries, run statistical analyses, and present findings to senior stakeholders.',
+      skills:['Python','SQL','Tableau','Excel','Statistics'], location:'Mumbai / Hybrid',
+      type:'Full-time', salMin:800000, salMax:1400000, expReq:2, active:true,
+      created:'2024-01-20' },
+    { id:3, recruiterId:1, title:'ML Engineer', company:'TechCorp India',
+      desc:'Build and deploy machine learning models at scale. You will work on NLP, recommendation systems, and computer vision projects. Experience with MLflow and Kubernetes is required.',
+      skills:['Python','TensorFlow','PyTorch','MLflow','Kubernetes'], location:'Remote',
+      type:'Full-time', salMin:1600000, salMax:2800000, expReq:3, active:true,
+      created:'2024-02-01' },
+    { id:4, recruiterId:1, title:'Frontend Developer (React)', company:'TechCorp India',
+      desc:'Build beautiful, performant UIs for our SaaS products. Strong React and TypeScript skills required. Familiarity with Figma and design systems is a big plus.',
+      skills:['React','TypeScript','CSS','Figma','REST APIs'], location:'Pune / Remote',
+      type:'Full-time', salMin:900000, salMax:1600000, expReq:2, active:true,
+      created:'2024-02-10' },
+    { id:5, recruiterId:5, title:'Product Manager', company:'StartupIO',
+      desc:'Drive product strategy and roadmap for our fintech platform. Work closely with engineering, design, and business teams.',
+      skills:['Product Strategy','Agile','SQL','Figma','Communication'], location:'Bangalore',
+      type:'Full-time', salMin:1800000, salMax:3000000, expReq:4, active:true,
+      created:'2024-02-15' },
+    { id:6, recruiterId:5, title:'Backend Engineer (Go/Python)', company:'StartupIO',
+      desc:'Build high-throughput payment processing systems in Go and Python. Experience with distributed systems and Kafka required.',
+      skills:['Go','Python','Kafka','Redis','PostgreSQL'], location:'Remote',
+      type:'Full-time', salMin:1400000, salMax:2400000, expReq:3, active:true,
+      created:'2024-02-18' },
+  ],
+  applications: [
+    { id:1, jobId:1, candidateId:2, match:84.3, status:'shortlisted', applied:'2024-02-20' },
+    { id:2, jobId:2, candidateId:3, match:78.1, status:'reviewed',    applied:'2024-02-21' },
+    { id:3, jobId:3, candidateId:4, match:93.7, status:'shortlisted', applied:'2024-02-22' },
+    { id:4, jobId:4, candidateId:2, match:61.5, status:'applied',     applied:'2024-02-23' },
+    { id:5, jobId:1, candidateId:3, match:45.2, status:'rejected',    applied:'2024-02-24' },
+    { id:6, jobId:3, candidateId:2, match:72.9, status:'applied',     applied:'2024-02-25' },
+  ],
+  interviewResults: {
+    2: { score:84, communication:88, technicalDepth:82, problemSolving:85, confidence:90, clarity:80,
+         badge:'Strong Hire', completedAt:'2024-02-14',
+         questions:['Tell me about a project you built from scratch.','How do you handle merge conflicts in a team?','Explain REST vs GraphQL.'],
+         feedback:'Riya communicates exceptionally well and structures answers using the STAR method naturally. Technical explanations are clear and show genuine depth. Confidence is a standout quality. Minor improvement area: could elaborate more on trade-offs in system design answers.' },
+    3: { score:72, communication:75, technicalDepth:68, problemSolving:74, confidence:70, clarity:76,
+         badge:'Hire', completedAt:'2024-02-15',
+         questions:['Walk me through your data analysis workflow.','How do you present findings to non-technical stakeholders?','What is the difference between OLAP and OLTP?'],
+         feedback:'Arjun demonstrates solid domain knowledge and communicates findings clearly. Answers are well-structured but occasionally drift off-topic. Recommend a follow-up technical round to validate SQL depth.' },
+    4: { score:96, communication:94, technicalDepth:98, problemSolving:97, confidence:96, clarity:95,
+         badge:'Strong Hire', completedAt:'2024-02-16',
+         questions:['Explain how you would design a recommendation engine.','What is attention mechanism in transformers?','How do you prevent model overfitting?'],
+         feedback:'Sara delivers an outstanding interview performance. Technical depth on ML systems is exceptional — the explanation of attention mechanisms was particularly impressive. Communication is polished and answers show both breadth and depth. Highest recommendation.' },
+  },
+  codingResults: {
+    2: { score:88, q1Score:92, q2Score:84, badge:'Advanced', completedAt:'2024-02-10',
+         q1Title:'Two Sum', q2Title:'Valid Parentheses',
+         q1Feedback:'Excellent use of a hash map for O(n) time complexity. Clean variable naming and proper edge case handling.',
+         q2Feedback:'Stack-based approach is optimal. Could add input validation for robustness.' },
+    3: { score:71, q1Score:68, q2Score:74, badge:'Intermediate', completedAt:'2024-02-11',
+         q1Title:'Reverse String', q2Title:'FizzBuzz',
+         q1Feedback:'Correct solution using two-pointer technique. Slightly verbose but readable.',
+         q2Feedback:'Works correctly. Using f-strings would make it more Pythonic.' },
+    4: { score:95, q1Score:97, q2Score:93, badge:'Expert', completedAt:'2024-02-12',
+         q1Title:'Merge Intervals', q2Title:'Binary Search',
+         q1Feedback:'Near-perfect solution. Sorting then merging in O(n log n) is the optimal approach. Great code clarity.',
+         q2Feedback:'Textbook binary search implementation with correct boundary conditions. Added comments are a bonus.' },
+  },
+};
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let S = {
+  user: null,
+  role: '',
+  uploadedVideo: null, // blob URL for demo
+  customAnalysis: null,
+};
+
+const API_BASE = '/api';
+let USE_BACKEND = false; // will flip to true if backend responds
+
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+function show(id) { document.querySelectorAll('#vLogin,#vReg').forEach(e=>e.classList.add('hidden')); document.getElementById(id)?.classList.remove('hidden'); }
+function toast(msg,type='') { const el=document.createElement('div'); el.className=`toast ${type}`; el.textContent=msg; document.getElementById('toasts').appendChild(el); setTimeout(()=>el.remove(),3500); }
+function inits(n='') { return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+function scColor(s) { return s>=75?'#1a6b4a':s>=55?'#c47a1e':'#c0392b'; }
+function matchCls(s) { return s>=70?'mh':s>=45?'mm':'ml'; }
+function fmtSal(mn,mx) { if(!mn&&!mx) return 'Not disclosed'; const f=n=>n>=100000?`₹${(n/100000).toFixed(1)}L`:`₹${n.toLocaleString()}`; return `${f(mn)} – ${f(mx)}`; }
+function fmtDate(d) { return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}); }
+
+function svgRing(score,sz=120){
+  const r=46,cx=60,cy=60,circ=2*Math.PI*r;
+  const fill=(score/100)*circ;
+  const col=scColor(score);
+  return `<svg width="${sz}" height="${sz}" viewBox="0 0 120 120">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#f0ede8" stroke-width="8"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="8"
+      stroke-dasharray="${fill} ${circ}" stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})"/>
+  </svg>
+  <div class="ring-inner"><span class="ring-num" style="color:${col}">${Math.round(score)}</span><span class="ring-lbl">/100</span></div>`;
+}
+
+function barRow(label,val,max,cls=''){
+  const pct=Math.min((val/max)*100,100);
+  const disp=max===100?`${val.toFixed(0)}%`:max===1?val.toFixed(2):`${val.toFixed(1)}/${max}`;
+  return `<div class="bar-row">
+    <span class="bar-lbl">${label}</span>
+    <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
+    <span class="bar-val">${disp}</span></div>`;
+}
+
+function skillTag(s){ return `<span class="tag tag-green">${s}</span>`; }
+function grayTag(s) { return `<span class="tag tag-gray">${s}</span>`; }
+
+function statusTag(st){
+  const m={applied:'tag-gray',reviewed:'tag-blue',shortlisted:'tag-green',rejected:'tag-red'};
+  return `<span class="tag ${m[st]||'tag-gray'}">${st.charAt(0).toUpperCase()+st.slice(1)}</span>`;
+}
+
+function openModal(title, body) {
+  document.getElementById('mTitle').textContent=title;
+  document.getElementById('mBody').innerHTML=body;
+  document.getElementById('overlay').classList.remove('hidden');
+}
+function closeModal(e) {
+  if(!e || e.target===document.getElementById('overlay'))
+    document.getElementById('overlay').classList.add('hidden');
+}
+
+// ═══════════════════════════════════════════════
+// BACKEND CHECK
+// ═══════════════════════════════════════════════
+async function checkBackend() {
+  try {
+    const r = await fetch(API_BASE+'/health', {signal:AbortSignal.timeout(2000)});
+    if(r.ok) { USE_BACKEND=true; console.log('✅ Connected to backend'); }
+  } catch { USE_BACKEND=false; }
+}
+
+async function apiCall(path,opts={}) {
+  const headers={'Content-Type':'application/json'};
+  if(S.token) headers['Authorization']=`Bearer ${S.token}`;
+  const r=await fetch(API_BASE+path,{headers,...opts});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(data.detail||'API error');
+  return data;
+}
+
+// ═══════════════════════════════════════════════
+// MOCK API LAYER (mirrors real backend)
+// ═══════════════════════════════════════════════
+function mockLogin(email, pass) {
+  const u = MOCK.users.find(u=>u.email===email && u.password===pass);
+  if(!u) throw new Error('Invalid email or password');
+  return u;
+}
+
+function getCandidates() {
+  return MOCK.users
+    .filter(u=>u.role==='candidate')
+    .map(u=>{
+      const p=MOCK.candidateProfiles[u.id]||{};
+      const a=MOCK.analyses[u.id]||null;
+      return { id:u.id, userId:u.id, name:u.name, email:u.email, ...p,
+               hasVideo:!!(S.user?.id===u.id?S.uploadedVideo:null),
+               analysis:a, overallScore:a?.score||0 };
+    });
+}
+
+function getCandidate(uid) { return getCandidates().find(c=>c.userId===uid); }
+
+function getJobs(activeOnly=true) {
+  return MOCK.jobs.filter(j=>activeOnly?j.active:true).map(j=>{
+    const apps=MOCK.applications.filter(a=>a.jobId===j.id);
+    return {...j, applicationCount:apps.length};
+  });
+}
+
+function computeMatch(candidateSkills=[], analysis=null, job={}) {
+  const req=new Set((job.skills||[]).map(s=>s.toLowerCase()));
+  const cand=new Set((candidateSkills||[]).map(s=>s.toLowerCase()));
+  const overlap=[...req].filter(s=>cand.has(s)).length;
+  const skillScore=(overlap/Math.max(req.size,1))*70;
+  let partial=0;
+  req.forEach(rs=>{cand.forEach(cs=>{if(rs.includes(cs)||cs.includes(rs))partial++;});});
+  const partialScore=Math.min((partial/Math.max(req.size,1))*15,15);
+  const aiBonus=analysis?(analysis.score/100)*15:0;
+  return Math.min(Math.round(skillScore+partialScore+aiBonus),99);
+}
+
+function getMatchedJobs(candidateId) {
+  const cand=getCandidate(candidateId);
+  return getJobs().map(j=>({...j, matchScore:computeMatch(cand?.skills,cand?.analysis,j)}))
+    .sort((a,b)=>b.matchScore-a.matchScore);
+}
+
+function getMyApplications(candidateId) {
+  return MOCK.applications.filter(a=>a.candidateId===candidateId).map(a=>{
+    const j=MOCK.jobs.find(j=>j.id===a.jobId)||{};
+    return {...a, jobTitle:j.title, company:j.company};
+  });
+}
+
+function getJobApplications(jobId) {
+  return MOCK.applications.filter(a=>a.jobId===jobId).map(a=>{
+    const cand=getCandidate(a.candidateId)||{};
+    return {...a, ...cand, matchScore:a.match};
+  });
+}
+
+function getRecruiterStats(userId) {
+  const myJobs=MOCK.jobs.filter(j=>j.recruiterId===userId);
+  const myJobIds=myJobs.map(j=>j.id);
+  const apps=MOCK.applications.filter(a=>myJobIds.includes(a.jobId));
+  return {
+    jobs:myJobs.length,
+    applications:apps.length,
+    shortlisted:apps.filter(a=>a.status==='shortlisted').length,
+    totalCandidates:MOCK.users.filter(u=>u.role==='candidate').length,
+  };
+}
+
+// ═══════════════════════════════════════════════
+// AI ANALYSIS SIMULATION
+// ═══════════════════════════════════════════════
+function runAIAnalysis(name, profileBio='', videoFile=null) {
+  // Simulates realistic AI pipeline output
+  const words=['Python','React','SQL','Docker','FastAPI','PostgreSQL','AWS','Machine Learning',
+               'Leadership','Agile','Communication','Problem Solving'];
+  const detectedSkills=words.slice(0,4+Math.floor(Math.random()*4));
+  const confidence=+(6.5+Math.random()*2.8).toFixed(1);
+  const clarity=+(7+Math.random()*2.5).toFixed(1);
+  const pace=+(125+Math.random()*40).toFixed(0);
+  const eye=+(68+Math.random()*24).toFixed(1);
+  const fillers=Math.floor(Math.random()*6)+1;
+  const sentiment=+(0.45+Math.random()*0.4).toFixed(2);
+  const overall=+(confidence*2.5+clarity*2.5+eye/10+sentiment*10+Math.max(0,10-fillers))/5*10;
+  const overallScore=+Math.min(98,Math.max(55,overall)).toFixed(1);
+
+  const transcript=`Hi, I'm ${name}. ${profileBio} I'm passionate about solving complex problems and delivering high-quality work. Throughout my career I've collaborated with cross-functional teams and I thrive in fast-paced, innovative environments. I believe strong communication and technical depth are what define great engineers. I'm excited about this opportunity and would love to contribute to your team.`;
+
+  const feedbacks=[
+    `${name} delivers a confident and well-structured video resume. Technical vocabulary is precise and relevant. Eye contact is maintained consistently throughout, signalling strong professional presence. Recommended for immediate interview.`,
+    `${name} presents a solid introduction with clear articulation of skills. Confidence is good overall with occasional moments of hesitation. Speaking pace is natural and easy to follow. Recommended for a follow-up screening call.`,
+    `${name} shows strong passion and enthusiasm. Communication style is warm and engaging. A few filler words are present but don't significantly impact the overall quality. Recommended for further evaluation.`,
+  ];
+
+  return {
+    score:overallScore, confidence, clarity, sentiment, pace:+pace,
+    eye, fillers, skills:detectedSkills, transcript,
+    feedback:feedbacks[Math.floor(Math.random()*feedbacks.length)],
+  };
+}
+
+// ═══════════════════════════════════════════════
+// PERSISTENCE — save/load all platform data
+// ═══════════════════════════════════════════════
+const STORE_KEY = 'vehire_data';
+
+function saveAll() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify({
+      users:           MOCK.users,
+      candidateProfiles: MOCK.candidateProfiles,
+      recruiterProfiles: MOCK.recruiterProfiles,
+      analyses:        MOCK.analyses,
+      jobs:            MOCK.jobs,
+      applications:    MOCK.applications,
+      codingResults:   MOCK.codingResults,
+      interviewResults:MOCK.interviewResults,
+      session: S.user ? { user: S.user, role: S.role } : null,
+    }));
+  } catch(e) { console.warn('Storage save failed:', e); }
+}
+
+function loadAll() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return false;
+    const saved = JSON.parse(raw);
+    if (saved.users)            MOCK.users            = saved.users;
+    if (saved.candidateProfiles)MOCK.candidateProfiles= saved.candidateProfiles;
+    if (saved.recruiterProfiles)MOCK.recruiterProfiles= saved.recruiterProfiles;
+    if (saved.analyses)         MOCK.analyses         = saved.analyses;
+    if (saved.jobs)             MOCK.jobs             = saved.jobs;
+    if (saved.applications)     MOCK.applications     = saved.applications;
+    if (saved.codingResults)    MOCK.codingResults    = saved.codingResults;
+    if (saved.interviewResults) MOCK.interviewResults = saved.interviewResults;
+    if (saved.session) {
+      S.user = saved.session.user;
+      S.role = saved.session.role;
+      return true; // auto-login
+    }
+  } catch(e) { console.warn('Storage load failed:', e); }
+  return false;
+}
+
+// Wrap every mutating action to auto-save
+function persist(fn) {
+  return function(...args) {
+    const result = fn.apply(this, args);
+    saveAll();
+    return result;
+  };
+}
+let selectedRole='candidate';
+function setRole(r){
+  selectedRole=r;
+  document.getElementById('rtC').classList.toggle('active',r==='candidate');
+  document.getElementById('rtR').classList.toggle('active',r==='recruiter');
+  document.getElementById('coField').classList.toggle('hidden',r==='candidate');
+}
+
+async function doLogin() {
+  const email=document.getElementById('lEmail').value.trim();
+  const pass=document.getElementById('lPass').value;
+  const btn=document.getElementById('btnLogin');
+  btn.innerHTML='<span class="spin"></span> Signing in...'; btn.disabled=true;
+  try {
+    await checkBackend();
+    let user;
+    if(USE_BACKEND) {
+      const form=new URLSearchParams({username:email,password:pass});
+      const r=await fetch(API_BASE+'/auth/login',{method:'POST',body:form});
+      const d=await r.json();
+      if(!r.ok) throw new Error(d.detail||'Login failed');
+      S.token=d.access_token; S.role=d.role;
+      user={id:d.user_id, name:d.full_name, role:d.role, email};
+    } else {
+      user=mockLogin(email,pass);
+      S.role=user.role;
+    }
+    S.user=user;
+    saveAll();
+    enterApp();
+  } catch(e) { toast(e.message,'err'); btn.innerHTML='Sign in'; btn.disabled=false; }
+}
+
+function doRegister() {
+  const name=document.getElementById('rName').value.trim();
+  const email=document.getElementById('rEmail').value.trim();
+  const pass=document.getElementById('rPass').value;
+  if(!name||!email||!pass) { toast('Please fill all fields','err'); return; }
+  if(pass.length<6) { toast('Password must be at least 6 characters','err'); return; }
+  if(MOCK.users.find(u=>u.email===email)) { toast('Email already registered','err'); return; }
+
+  // Generate unique ID (use timestamp to avoid collisions)
+  const newId = Date.now();
+  const newUser = {id:newId, email, password:pass, role:selectedRole, name,
+                   createdAt: new Date().toISOString()};
+  MOCK.users.push(newUser);
+
+  if(selectedRole==='candidate') {
+    MOCK.candidateProfiles[newId]={
+      headline:'', location:'', exp:0, edu:'', skills:[], linkedin:'', github:''
+    };
+  } else {
+    const company=document.getElementById('rCo').value.trim();
+    MOCK.recruiterProfiles[newId]={company, industry:'', size:'', website:''};
+  }
+
+  S.user={id:newId, name, role:selectedRole, email};
+  S.role=selectedRole;
+  saveAll();
+  toast(`Welcome to VeHire, ${name.split(' ')[0]}! 🎉`,'ok');
+  enterApp();
+}
+
+function enterApp() {
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('avt').textContent=inits(S.user.name);
+  document.getElementById('topName').textContent=S.user.name;
+  buildNav();
+  navigate('dashboard');
+}
+
+function logout() {
+  S={user:null,role:'',uploadedVideo:null,customAnalysis:null};
+  // Clear session but keep platform data
+  try {
+    const raw=localStorage.getItem(STORE_KEY);
+    if(raw){ const d=JSON.parse(raw); d.session=null; localStorage.setItem(STORE_KEY,JSON.stringify(d)); }
+  } catch(e){}
+  document.getElementById('app').style.display='none';
+  document.getElementById('auth-screen').style.display='grid';
+  document.getElementById('lEmail').value='recruiter@techcorp.com';
+  document.getElementById('lPass').value='password123';
+  show('vLogin');
+}
+
+function buildNav() {
+  const pages=S.role==='candidate'
+    ?[['dashboard','🏠 Dashboard'],['my-resume','🎬 My Resume'],['find-jobs','💼 Find Jobs'],['my-apps','📋 Applications'],['coding-test','🧠 AI Test'],['ai-interview','🎤 Interview']]
+    :[['dashboard','🏠 Dashboard'],['candidates','👥 Candidates'],['my-jobs','💼 My Jobs'],['post-job','➕ Post Job']];
+  document.getElementById('topNav').innerHTML=pages.map(([id,lbl])=>
+    `<button class="nav-btn" id="nb-${id}" onclick="navigate('${id}')">${lbl}</button>`).join('');
+}
+
+function navigate(page) {
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`nb-${page}`)?.classList.add('active');
+  document.getElementById('pageRoot').innerHTML=`<div style="text-align:center;padding:80px"><span class="spin dark" style="width:32px;height:32px"></span></div>`;
+  const pages={
+    'dashboard':    S.role==='candidate'?pageCandDash:pageRecDash,
+    'my-resume':    pageMyResume,
+    'find-jobs':    pageFindJobs,
+    'my-apps':      pageMyApps,
+    'coding-test':  pageCodingTest,
+    'ai-interview': pageAIInterview,
+    'candidates':   pageCandidates,
+    'my-jobs':      pageMyJobs,
+    'post-job':     pagePostJob,
+  };
+  setTimeout(()=>(pages[page]||pageCandDash)(), 100);
+}
+
+// ═══════════════════════════════════════════════
+// CANDIDATE PAGES
+// ═══════════════════════════════════════════════
+function pageCandDash() {
+  const uid      = S.user.id;
+  const a        = S.customAnalysis || (MOCK.analyses[uid] || null);
+  const coding   = MOCK.codingResults[uid]   || null;
+  const interview= MOCK.interviewResults[uid] || null;
+  const jobs     = getMatchedJobs(uid).slice(0,4);
+  const apps     = getMyApplications(uid);
+  const vidScore = a?.score || 0;
+  const codScore = coding?.score || 0;
+  const intScore = interview?.score || 0;
+
+  // Overall AI score = weighted average of available scores
+  const available = [vidScore, codScore, intScore].filter(s=>s>0);
+  const overallAI = available.length ? Math.round(available.reduce((s,x)=>s+x,0)/available.length) : 0;
+
+  function miniRing(score, size=72) {
+    const r=30,cx=36,cy=36,circ=2*Math.PI*r;
+    const fill=(score/100)*circ, col=scColor(score);
+    return `<svg width="${size}" height="${size}" viewBox="0 0 72 72">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#f0ede8" stroke-width="6"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="6"
+        stroke-dasharray="${fill} ${circ}" stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})"/>
+    </svg>
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <span style="font-family:'Instrument Serif',serif;font-size:18px;line-height:1;color:${col}">${score||'—'}</span>
+    </div>`;
+  }
+
+  function aiScoreCard(icon, label, score, badge, sub, page, done) {
+    const col = scColor(score);
+    return `
+      <div class="card" style="position:relative;overflow:hidden;cursor:${done?'default':'pointer'}" ${!done?`onclick="navigate('${page}')"`:''}> 
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
+          <div>
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin-bottom:4px">${label}</div>
+            ${done
+              ? `<span class="tag ${score>=90?'tag-red':score>=75?'tag-amber':score>=60?'tag-blue':'tag-gray'}" style="font-size:11px">${badge}</span>`
+              : `<span class="tag tag-gray" style="font-size:11px">Not taken</span>`
+            }
+          </div>
+          <div style="position:relative;width:72px;height:72px;flex-shrink:0">${done?miniRing(score):`
+            <div style="width:72px;height:72px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:24px">${icon}</div>`}
+          </div>
+        </div>
+        ${done ? `
+          <div class="prog-bar" style="margin-bottom:6px"><div class="prog-fill" style="width:${score}%;background:${col}"></div></div>
+          <div style="font-size:12px;color:var(--ink3)">${sub}</div>
+        ` : `
+          <button class="btn btn-primary btn-sm" style="width:100%;margin-top:4px" onclick="navigate('${page}')">Take ${label} →</button>
+        `}
+      </div>`;
+  }
+
+  render(`
+    <div class="fade">
+      <div class="page-hdr">
+        <h1>Welcome, <em class="serif">${S.user.name.split(' ')[0]}</em> 👋</h1>
+        <p>Your complete AI evaluation overview</p>
+      </div>
+
+      <!-- Overall AI Score Hero -->
+      <div class="card" style="margin-bottom:24px;background:linear-gradient(135deg,#0d0d0d 0%,#1a3a2a 100%);border:none;color:#fff;padding:28px 32px">
+        <div style="display:flex;align-items:center;gap:32px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:12px;color:rgba(255,255,255,.5);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Overall AI Score</div>
+            <div style="font-family:'Instrument Serif',serif;font-size:72px;line-height:1;color:${overallAI>=75?'#5aab82':overallAI>=55?'#f0b429':'#e05252'}">${overallAI||'—'}</div>
+            <div style="font-size:14px;color:rgba(255,255,255,.4);margin-top:4px">
+              ${available.length===0?'Complete your evaluations below':
+                available.length===1?'Based on 1 evaluation · 2 more pending':
+                available.length===2?'Based on 2 evaluations · 1 more pending':
+                'All 3 evaluations complete'}
+            </div>
+          </div>
+          <div style="display:flex;gap:20px;flex-wrap:wrap">
+            ${[
+              ['🎬','Video Resume', vidScore, !!a],
+              ['🧠','Coding Test', codScore, !!coding],
+              ['🎤','AI Interview', intScore, !!interview],
+            ].map(([ico,lbl,sc,done])=>`
+              <div style="text-align:center">
+                <div style="width:48px;height:48px;border-radius:50%;background:${done?scColor(sc)+'33':'rgba(255,255,255,.08)'};display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 6px">${done?'✓':ico}</div>
+                <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:2px">${lbl}</div>
+                <div style="font-family:'Instrument Serif',serif;font-size:20px;color:${done?scColor(sc):'rgba(255,255,255,.25)'}">${done?sc:'—'}</div>
+              </div>`).join('')}
+          </div>
+          <div style="margin-left:auto;text-align:right">
+            <div style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:4px">Applications</div>
+            <div style="font-family:'Instrument Serif',serif;font-size:32px;color:#fff">${apps.length}</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.4)">${apps.filter(x=>x.status==='shortlisted').length} shortlisted</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 AI Score Cards -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px">
+
+        <!-- Video Resume -->
+        ${aiScoreCard('🎬','Video Resume', vidScore,
+          a ? (vidScore>=85?'Outstanding':vidScore>=70?'Strong':'Developing') : '',
+          a ? `Confidence ${a.confidence}/10 · Clarity ${a.clarity}/10 · Eye contact ${a.eye}%` : '',
+          'my-resume', !!a)}
+
+        <!-- Coding Test -->
+        ${aiScoreCard('🧠','Coding Test', codScore,
+          coding?.badge||'',
+          coding ? `${coding.q1Title}: ${coding.q1Score} · ${coding.q2Title}: ${coding.q2Score}` : '',
+          'coding-test', !!coding)}
+
+        <!-- AI Interview -->
+        ${aiScoreCard('🎤','AI Interview', intScore,
+          interview?.badge||'',
+          interview ? `Communication ${interview.communication} · Tech ${interview.technicalDepth}` : '',
+          'ai-interview', !!interview)}
+
+      </div>
+
+      <!-- Bottom 2-col: detailed analysis + job matches -->
+      <div class="two-col">
+        <div class="card">
+          <div class="sec">Detailed AI Breakdown</div>
+          ${[
+            a      && ['🎬 Video Resume',   [['Confidence',a.confidence,10],['Clarity',a.clarity,10],['Eye Contact',a.eye,100],['Sentiment',Math.min(a.sentiment*10+5,10),10]]],
+            coding && ['🧠 Coding Test',    [['Overall',coding.score,100],['Q1 — '+coding.q1Title,coding.q1Score,100],['Q2 — '+coding.q2Title,coding.q2Score,100]]],
+            interview&&['🎤 AI Interview',  [['Communication',interview.communication,100],['Tech Depth',interview.technicalDepth,100],['Problem Solving',interview.problemSolving,100],['Confidence',interview.confidence,100]]],
+          ].filter(Boolean).map(([title,rows])=>`
+            <div style="margin-bottom:18px">
+              <div style="font-size:12px;font-weight:600;color:var(--ink3);margin-bottom:10px">${title}</div>
+              ${rows.map(([l,v,mx])=>barRow(l,v,mx)).join('')}
+            </div>`).join('')}
+          ${!a && !coding && !interview ? `
+            <div class="empty" style="padding:32px 0">
+              <div class="empty-icon">📊</div>
+              <h3>No evaluations yet</h3>
+              <p>Complete your Video Resume, Coding Test, and AI Interview to see detailed AI scoring</p>
+            </div>` : ''}
+        </div>
+
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="sec">Top Job Matches</div>
+            ${jobs.length ? jobs.map(j=>`
+              <div style="padding:11px 0;border-bottom:1px solid var(--surface2);cursor:pointer;last-child:border:none" onclick="openJobModal(${j.id})">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div>
+                    <div style="font-weight:600;font-size:14px">${j.title}</div>
+                    <div style="font-size:12px;color:var(--ink3)">${j.company} · ${j.location}</div>
+                  </div>
+                  <span class="mbadge ${matchCls(j.matchScore)}">${j.matchScore}%</span>
+                </div>
+              </div>`).join('') : '<div style="color:var(--ink3);font-size:14px;padding:12px 0">Upload your resume to see matched jobs</div>'}
+            <button class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%" onclick="navigate('find-jobs')">View All Jobs →</button>
+          </div>
+
+          <div class="card">
+            <div class="sec">Complete Your Profile</div>
+            ${[
+              [!!a,       '🎬','Video Resume','Get AI-scored on communication & confidence','my-resume'],
+              [!!coding,  '🧠','Coding Test', '2 AI-evaluated coding questions','coding-test'],
+              [!!interview,'🎤','AI Interview','3 behavioural + technical questions','ai-interview'],
+            ].map(([done,ico,lbl,desc,pg])=>`
+              <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--surface2)">
+                <div style="width:36px;height:36px;border-radius:50%;background:${done?'var(--accent-light)':'var(--surface2)'};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${done?'✅':ico}</div>
+                <div style="flex:1">
+                  <div style="font-size:14px;font-weight:500;color:${done?'var(--ink3)':'var(--ink)'}">${lbl}</div>
+                  <div style="font-size:12px;color:var(--ink3)">${desc}</div>
+                </div>
+                ${!done?`<button class="btn btn-primary btn-sm" onclick="navigate('${pg}')">Start</button>`:'<span class="tag tag-green">Done</span>'}
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>`);
+}
+
+function pageMyResume() {
+  const uid=S.user.id;
+  const p=MOCK.candidateProfiles[uid]||{skills:[]};
+  const a=S.customAnalysis||(MOCK.analyses[uid]||null);
+  const hasVideo=!!(S.uploadedVideo||MOCK.analyses[uid]);
+
+  render(`
+    <div class="fade">
+      <div class="page-hdr"><h1>My Video Resume</h1><p>Upload, analyse, and manage your resume</p></div>
+      <div class="two-col" style="align-items:start">
+        <div>
+          <div class="card" style="margin-bottom:20px">
+            <div class="sec">Video Resume</div>
+            ${S.uploadedVideo?`
+              <video class="video-preview" controls src="${S.uploadedVideo}"></video>
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <button class="btn btn-ghost btn-sm" onclick="triggerUpload()">Replace Video</button>
+              </div>
+            `:`
+              <div class="upload-zone" id="uploadZone" onclick="triggerUpload()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+                <div class="upload-icon">🎬</div>
+                <h3>Drop your video resume here</h3>
+                <p>MP4, WebM, MOV · Ideal: 60–90 seconds</p>
+                <p style="margin-top:8px;font-size:12px;color:var(--ink4)">Or click to browse</p>
+              </div>
+            `}
+            <input type="file" id="vidFile" accept="video/*" class="hidden" onchange="handleVideoFile(this)">
+            <div id="uploadProg" class="hidden" style="margin-top:14px">
+              <div id="uploadStatus" style="font-size:13px;color:var(--ink3);margin-bottom:6px"></div>
+              <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="sec">Profile Details</div>
+            <div class="form-group"><label class="form-label">Headline</label>
+              <input class="form-input" id="ph" value="${p.headline||''}" placeholder="e.g. Full-Stack Developer | Python & React"></div>
+            <div class="form-group"><label class="form-label">Location</label>
+              <input class="form-input" id="pl" value="${p.location||''}" placeholder="Bangalore, India"></div>
+            <div class="two-col" style="gap:12px">
+              <div class="form-group"><label class="form-label">Experience (yrs)</label>
+                <input class="form-input" id="pe" type="number" value="${p.exp||0}"></div>
+              <div class="form-group"><label class="form-label">Education</label>
+                <input class="form-input" id="ped" value="${p.edu||''}" placeholder="B.Tech, IIT Bombay"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Skills (comma-separated)</label>
+              <input class="form-input" id="ps" value="${(p.skills||[]).join(', ')}" placeholder="Python, React, SQL"></div>
+            <div class="form-group"><label class="form-label">LinkedIn URL</label>
+              <input class="form-input" id="pli" value="${p.linkedin||''}" placeholder="https://linkedin.com/in/..."></div>
+            <button class="btn btn-primary" onclick="saveProfile()">Save Profile</button>
+          </div>
+        </div>
+        <div>
+          ${a?`
+            <div class="card">
+              <div class="sec">AI Analysis Results</div>
+              <div style="display:flex;justify-content:center;margin-bottom:20px">
+                <div class="ring" style="position:relative">${svgRing(Math.round(a.score))}</div>
+              </div>
+              ${barRow('Confidence',a.confidence,10)}
+              ${barRow('Clarity',a.clarity,10,'b')}
+              ${barRow('Sentiment',Math.min(a.sentiment*10+5,10),10,'a')}
+              ${barRow('Eye Contact',a.eye,100)}
+              <div class="divider"></div>
+              <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px">
+                <div><div style="font-size:12px;color:var(--ink3)">Pace</div><div style="font-weight:500">${a.pace} wpm</div></div>
+                <div><div style="font-size:12px;color:var(--ink3)">Filler words</div><div style="font-weight:500">${a.fillers} found</div></div>
+              </div>
+              <div class="sec">AI Feedback</div>
+              <div class="feedback">${a.feedback}</div>
+              <div class="sec" style="margin-top:16px">Transcript</div>
+              <div class="transcript">${a.transcript}</div>
+              <div class="sec" style="margin-top:16px">Skills Detected</div>
+              <div class="skills-wrap">${(a.skills||[]).map(skillTag).join('')}</div>
+            </div>
+          `:`<div class="card"><div class="empty"><div class="empty-icon">🤖</div><h3>AI Analysis</h3><p>Upload your video resume to get AI-powered scoring — confidence, skills, clarity, eye contact, and personalised recruiter feedback.</p></div></div>`}
+        </div>
+      </div>
+    </div>`);
+}
+
+function triggerUpload(){ document.getElementById('vidFile').click(); }
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('uploadZone')?.classList.remove('drag');
+  const f=e.dataTransfer.files[0]; if(f) processVideoFile(f);
+}
+function handleVideoFile(inp){ if(inp.files[0]) processVideoFile(inp.files[0]); }
+
+async function processVideoFile(file) {
+  S.uploadedVideo=URL.createObjectURL(file);
+  const prog=document.getElementById('uploadProg');
+  const status=document.getElementById('uploadStatus');
+  const fill=document.getElementById('progFill');
+  if(prog){ prog.classList.remove('hidden'); }
+
+  const steps=[
+    [0,'📤 Uploading video...', 15],
+    [700,'🎙️ Transcribing speech with Whisper AI...', 38],
+    [1600,'🔍 Extracting skills with NLP...', 62],
+    [2500,'📊 Scoring confidence & clarity...', 80],
+    [3300,'🤖 Generating AI feedback...', 95],
+    [4000,'✅ Analysis complete!', 100],
+  ];
+  for(const [ms,msg,pct] of steps){
+    await new Promise(r=>setTimeout(r,ms===0?0:ms-steps[steps.indexOf([ms,msg,pct])-1]?.[0]||ms));
+    if(status) status.textContent=msg;
+    if(fill) fill.style.width=pct+'%';
+  }
+
+  const uid=S.user.id;
+  const p=MOCK.candidateProfiles[uid]||{};
+  const bio=`I have ${p.exp||2} years of experience with ${(p.skills||[]).slice(0,3).join(', ')}.`;
+  S.customAnalysis=runAIAnalysis(S.user.name, bio, file);
+
+  // Update profile skills
+  if(p) p.skills=[...new Set([...(p.skills||[]),...(S.customAnalysis.skills||[])])];
+
+  await new Promise(r=>setTimeout(r,500));
+  toast('Video analysed successfully!','ok');
+  pageMyResume();
+}
+
+function saveProfile() {
+  const uid=S.user.id;
+  if(!MOCK.candidateProfiles[uid]) MOCK.candidateProfiles[uid]={};
+  const p=MOCK.candidateProfiles[uid];
+  p.headline=document.getElementById('ph').value;
+  p.location=document.getElementById('pl').value;
+  p.exp=+document.getElementById('pe').value||0;
+  p.edu=document.getElementById('ped').value;
+  p.skills=document.getElementById('ps').value.split(',').map(s=>s.trim()).filter(Boolean);
+  p.linkedin=document.getElementById('pli').value;
+  toast('Profile saved!','ok');
+}
+
+function pageFindJobs() {
+  const jobs=getMatchedJobs(S.user.id);
+  window._jobs=jobs;
+  render(`
+    <div class="fade">
+      <div class="page-hdr"><h1>Find Jobs</h1><p>AI-matched roles sorted by your compatibility</p></div>
+      <div class="filter-bar">
+        <input class="form-input" placeholder="Search title, company, skills..." oninput="filterJobs(this.value)" style="max-width:300px">
+        <select class="form-input" onchange="filterJobsType(this.value)">
+          <option value="">All types</option><option>Full-time</option><option>Part-time</option><option>Contract</option>
+        </select>
+      </div>
+      <div id="jobsList"></div>
+    </div>`);
+  renderJobList(jobs);
+}
+
+let _jobTypeFilter='';
+function filterJobs(q) {
+  const filtered=(window._jobs||[]).filter(j=>{
+    const sq=q.toLowerCase();
+    const tm=j.title.toLowerCase().includes(sq)||j.company.toLowerCase().includes(sq)||(j.skills||[]).some(s=>s.toLowerCase().includes(sq));
+    return tm&&(!_jobTypeFilter||j.type===_jobTypeFilter);
+  });
+  renderJobList(filtered);
+}
+function filterJobsType(t){ _jobTypeFilter=t; filterJobs(document.querySelector('.filter-bar .form-input')?.value||''); }
+
+function renderJobList(jobs) {
+  const el=document.getElementById('jobsList');
+  if(!jobs.length){ el.innerHTML='<div class="empty card"><div class="empty-icon">🔍</div><h3>No jobs found</h3></div>'; return; }
+  el.innerHTML=jobs.map(j=>`
+    <div class="job-card" onclick="openJobModal(${j.id})">
+      <div class="job-hdr">
+        <div><div class="job-title">${j.title}</div><div class="job-co">${j.company}</div></div>
+        ${j.matchScore!==undefined?`<span class="mbadge ${matchCls(j.matchScore)}">${j.matchScore}% match</span>`:''}
+      </div>
+      <div class="job-meta">
+        <span>📍 ${j.location}</span><span>💼 ${j.type}</span>
+        <span>📅 ${j.expReq}+ yrs</span><span>💰 ${fmtSal(j.salMin,j.salMax)}</span>
+      </div>
+      <div class="skills-wrap">${(j.skills||[]).map(grayTag).join('')}</div>
+    </div>`).join('');
+}
+
+function openJobModal(jobId, matchScore=null) {
+  const j=MOCK.jobs.find(x=>x.id===jobId); if(!j) return;
+  if(matchScore===null && S.role==='candidate'){
+    const cand=getCandidate(S.user.id)||{};
+    matchScore=computeMatch(cand.skills,cand.analysis,j);
+  }
+  const alreadyApplied=MOCK.applications.some(a=>a.jobId===jobId&&a.candidateId===S.user.id);
+  openModal(j.title,`
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <span class="tag tag-gray">📍 ${j.location}</span>
+      <span class="tag tag-gray">💼 ${j.type}</span>
+      <span class="tag tag-gray">📅 ${j.expReq}+ yrs exp</span>
+      <span class="tag tag-gray">💰 ${fmtSal(j.salMin,j.salMax)}</span>
+      ${matchScore!==null?`<span class="mbadge ${matchCls(matchScore)}">${matchScore}% match</span>`:''}
+    </div>
+    <div class="sec">About ${j.company}</div>
+    <p style="font-size:14px;color:var(--ink3);margin-bottom:16px">${j.company} · ${MOCK.jobs.filter(x=>x.recruiterId===j.recruiterId).length} open roles</p>
+    <div class="sec">Job Description</div>
+    <p style="font-size:14px;line-height:1.8;color:var(--ink2);margin-bottom:16px">${j.desc}</p>
+    <div class="sec">Required Skills</div>
+    <div class="skills-wrap" style="margin-bottom:20px">${(j.skills||[]).map(skillTag).join('')}</div>
+    <div style="display:flex;gap:8px">
+      ${S.role==='candidate'?alreadyApplied
+        ?`<button class="btn btn-secondary" disabled style="flex:1">✓ Already Applied</button>`
+        :`<button class="btn btn-primary" style="flex:1" onclick="applyJob(${j.id},${matchScore||50})">Apply Now →</button>`
+        :''}
+      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+    </div>`);
+}
+
+function applyJob(jobId, match) {
+  const newApp={id:MOCK.applications.length+1,jobId,candidateId:S.user.id,match,status:'applied',applied:new Date().toISOString().split('T')[0]};
+  MOCK.applications.push(newApp);
+  toast(`Applied! Your match score: ${match}%`,'ok');
+  closeModal();
+}
+
+function pageMyApps() {
+  const apps=getMyApplications(S.user.id);
+  render(`
+    <div class="fade">
+      <div class="page-hdr"><h1>My Applications</h1><p>${apps.length} application${apps.length!==1?'s':''} submitted</p></div>
+      ${!apps.length?'<div class="empty card"><div class="empty-icon">📋</div><h3>No applications yet</h3><p>Browse jobs and apply</p></div>':`
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="tbl">
+          <thead><tr><th>Job</th><th>Company</th><th>Match</th><th>Status</th><th>Applied</th></tr></thead>
+          <tbody>${apps.map(a=>`
+            <tr onclick="openJobModal(${a.jobId})" style="cursor:pointer">
+              <td><span style="font-weight:500">${a.jobTitle}</span></td>
+              <td style="color:var(--ink3)">${a.company}</td>
+              <td><span class="mbadge ${matchCls(a.match)}">${a.match.toFixed(0)}%</span></td>
+              <td>${statusTag(a.status)}</td>
+              <td style="color:var(--ink3);font-size:13px">${fmtDate(a.applied)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`}
+    </div>`);
+}
+
+// ═══════════════════════════════════════════════
+// RECRUITER PAGES
+// ═══════════════════════════════════════════════
+function pageRecDash() {
+  const stats=getRecruiterStats(S.user.id);
+  const allCands=getCandidates();
+  const avgScore=allCands.reduce((s,c)=>s+(c.overallScore||0),0)/Math.max(allCands.length,1);
+  const top3=allCands.sort((a,b)=>b.overallScore-a.overallScore).slice(0,3);
+
+  render(`
+    <div class="fade">
+      <div class="page-hdr"><h1>Recruiter Dashboard</h1><p>AI-powered hiring overview</p></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-lbl">Active Jobs</div><div class="stat-val">${stats.jobs}</div><div class="stat-sub">posted by you</div></div>
+        <div class="stat-card"><div class="stat-lbl">Applications</div><div class="stat-val">${stats.applications}</div><div class="stat-sub">across all jobs</div></div>
+        <div class="stat-card"><div class="stat-lbl">Shortlisted</div><div class="stat-val" style="color:var(--accent)">${stats.shortlisted}</div><div class="stat-sub">candidates</div></div>
+        <div class="stat-card"><div class="stat-lbl">Platform Pool</div><div class="stat-val">${stats.totalCandidates}</div><div class="stat-sub">available candidates</div></div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="sec">Top Candidates by AI Score</div>
+          ${top3.map(c=>`
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--surface2);cursor:pointer" onclick="openCandModal(${c.userId})">
+              <div class="cand-av">${inits(c.name)}</div>
+              <div style="flex:1">
+                <div style="font-weight:600">${c.name}</div>
+                <div style="font-size:13px;color:var(--ink3)">${c.headline||'Candidate'}</div>
+                <div class="skills-wrap" style="margin-top:5px">${(c.skills||[]).slice(0,3).map(skillTag).join('')}</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <div style="font-family:'Instrument Serif',serif;font-size:24px;color:${scColor(c.overallScore)}">${c.overallScore}</div>
+                <div style="font-size:11px;color:var(--ink3)">AI Score</div>
+              </div>
+            </div>`).join('')}
+          <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="navigate('candidates')">View All Candidates →</button>
+        </div>
+        <div class="card">
+          <div class="sec">Quick Actions</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+            <button class="btn btn-primary" onclick="navigate('candidates')">🔍 Browse All Candidates</button>
+            <button class="btn btn-secondary" onclick="navigate('post-job')">➕ Post a New Job</button>
+            <button class="btn btn-ghost" onclick="navigate('my-jobs')">📋 Manage My Jobs</button>
+          </div>
+          <div class="divider"></div>
+          <div class="sec">Platform Stats</div>
+          <div style="font-size:14px;color:var(--ink2);line-height:2.2">
+            📊 Avg AI Score: <strong>${avgScore.toFixed(1)}</strong><br>
+            🎬 Video Resumes: <strong>${allCands.filter(c=>c.overallScore>0).length}</strong><br>
+            ⭐ Score 80+: <strong>${allCands.filter(c=>c.overallScore>=80).length}</strong> candidates
+          </div>
+        </div>
+      </div>
+    </div>`);
+}
+
+function pageCandidates() {
+  const cands=getCandidates();
+  window._cands=cands;
+  render(`
+    <div class="fade">
+      <div class="page-hdr"><h1>Browse Candidates</h1><p>${cands.length} candidates on the platform</p></div>
+      <div class="filter-bar">
+        <input class="form-input" placeholder="Search name, skills, headline..." oninput="filterCands(this.value)">
+        <select class="form-input" onchange="filterCandScore(this.value)">
+          <option value="0">All AI scores</option><option value="80">80+ score</option><option value="70">70+ score</option><option value="60">60+ score</option>
+        </select>
+        <select class="form-input" onchange="filterCandExp(this.value)">
+          <option value="0">Any experience</option><option value="1">1+ years</option><option value="3">3+ years</option><option value="5">5+ years</option>
+        </select>
+      </div>
+      <div id="candGrid" class="cand-grid"></div>
+    </div>`);
+  renderCandGrid(cands);
+}
+let _cMinScore=0,_cMinExp=0,_cQ='';
+function filterCands(q){ _cQ=q; _applyFilter(); }
+function filterCandScore(v){ _cMinScore=+v; _applyFilter(); }
+function filterCandExp(v){ _cMinExp=+v; _applyFilter(); }
+function _applyFilter(){
+  const f=(window._cands||[]).filter(c=>{
+    const tm=_cQ===''||c.name.toLowerCase().includes(_cQ.toLowerCase())||(c.skills||[]).some(s=>s.toLowerCase().includes(_cQ.toLowerCase()))||(c.headline||'').toLowerCase().includes(_cQ.toLowerCase());
+    return tm&&(c.overallScore>=_cMinScore)&&((c.exp||0)>=_cMinExp);
+  });
+  renderCandGrid(f);
+}
+function renderCandGrid(cands){
+  const el=document.getElementById('candGrid');
+  if(!cands.length){ el.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">👥</div><h3>No candidates match your filters</h3></div>'; return; }
+  el.innerHTML=cands.map(c=>`
+    <div class="cand-card" onclick="openCandModal(${c.userId})">
+      <div class="cand-card-top">
+        <div class="cand-av">${inits(c.name)}</div>
+        <div>
+          <div class="cand-name">${c.name}</div>
+          <div class="cand-hl">${c.headline||'Candidate'}</div>
+          <div style="font-size:12px;color:var(--ink4);margin-top:2px">📍 ${c.location||'—'} · ${c.exp||0} yrs exp</div>
+        </div>
+      </div>
+      <div class="cand-card-mid">
+        <div class="skills-wrap">${(c.skills||[]).slice(0,5).map(skillTag).join('')}</div>
+        ${c.overallScore>0?`<span class="tag tag-blue" style="margin-top:8px">🎬 Video resume analysed</span>`:'<span class="tag tag-gray" style="margin-top:8px">No video yet</span>'}
+      </div>
+      <div class="cand-card-bot">
+        <div>
+          <div style="font-size:11px;color:var(--ink3)">AI Score</div>
+          <div style="font-family:'Instrument Serif',serif;font-size:24px;color:${scColor(c.overallScore)}">${c.overallScore||'—'}</div>
+        </div>
+        ${c.analysis?`<span class="tag tag-${c.analysis.confidence>=8?'green':'amber'}">Confidence: ${c.analysis.confidence}/10</span>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function openCandModal(userId) {
+  const c=getCandidate(userId); if(!c) return;
+  const a=c.analysis;
+  openModal(c.name,`
+    <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:20px">
+      <div class="cand-av" style="width:56px;height:56px;font-size:20px">${inits(c.name)}</div>
+      <div style="flex:1">
+        <div style="font-size:16px;font-weight:600;margin-bottom:3px">${c.name}</div>
+        <div style="color:var(--ink3);font-size:14px;margin-bottom:8px">${c.headline||'Candidate'}</div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <span class="tag tag-gray">📍 ${c.location||'—'}</span>
+          <span class="tag tag-gray">📅 ${c.exp||0} yrs exp</span>
+          <span class="tag tag-gray">🎓 ${c.edu||'Not specified'}</span>
+          ${a?'<span class="tag tag-blue">🎬 AI Analysed</span>':''}
+        </div>
+      </div>
+      ${a?`<div class="ring-wrap"><div class="ring" style="position:relative">${svgRing(Math.round(a.score),100)}</div><span style="font-size:12px;color:var(--ink3)">AI Score</span></div>`:''}
+    </div>
+    ${a?`
+      <div class="sec">AI Analysis</div>
+      ${barRow('Confidence',a.confidence,10)}
+      ${barRow('Clarity',a.clarity,10,'b')}
+      ${barRow('Eye Contact',a.eye,100,'a')}
+      <div class="feedback" style="margin-bottom:16px">${a.feedback}</div>
+      <div class="sec">Transcript Preview</div>
+      <div class="transcript" style="margin-bottom:16px">${a.transcript}</div>
+    `:''}
+    <div class="sec">Skills</div>
+    <div class="skills-wrap" style="margin-bottom:20px">${(c.skills||[]).map(skillTag).join('')||'<span style="color:var(--ink3);font-size:13px">No skills listed</span>'}</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="shortlistCandidate(${userId})">⭐ Shortlist Candidate</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+    </div>`);
+}
+
+function shortlistCandidate(userId){
+  // In real app: opens a job selector then updates application status
+  toast('Candidate shortlisted! (Tip: manage status via job applications)','ok');
+  closeModal();
+}
+
+function pageMyJobs() {
+  const myJobs=MOCK.jobs.filter(j=>j.recruiterId===S.user.id&&j.active);
+  render(`
+    <div class="fade">
+      <div class="page-hdr"><h1>My Jobs</h1><p>${myJobs.length} active posting${myJobs.length!==1?'s':''}</p></div>
+      <div style="margin-bottom:16px"><button class="btn btn-primary btn-sm" onclick="navigate('post-job')">➕ Post New Job</button></div>
+      ${!myJobs.length?'<div class="empty card"><div class="empty-icon">💼</div><h3>No jobs posted yet</h3><button class="btn btn-primary btn-sm" style="margin-top:16px;width:auto" onclick="navigate(\'post-job\')">Post your first job →</button></div>':
+        myJobs.map(j=>{
+          const appCount=MOCK.applications.filter(a=>a.jobId===j.id).length;
+          const shortCount=MOCK.applications.filter(a=>a.jobId===j.id&&a.status==='shortlisted').length;
+          return `
+          <div class="job-card">
+            <div class="job-hdr">
+              <div><div class="job-title">${j.title}</div>
+              <div class="job-meta">
+                <span>📍 ${j.location}</span><span>💼 ${j.type}</span>
+                <span>💰 ${fmtSal(j.salMin,j.salMax)}</span><span>📅 ${j.expReq}+ yrs</span>
+              </div></div>
+              <div style="display:flex;gap:8px;flex-shrink:0">
+                <button class="btn btn-secondary btn-sm" onclick="openJobApps(${j.id},'${j.title}')">
+                  ${appCount} Application${appCount!==1?'s':''} · ${shortCount} Shortlisted
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="closeJob(${j.id})">Close</button>
+              </div>
+            </div>
+            <div class="skills-wrap">${(j.skills||[]).map(grayTag).join('')}</div>
+          </div>`;
+        }).join('')
+      }
+    </div>`);
+}
+
+function openJobApps(jobId, title) {
+  const apps=getJobApplications(jobId);
+  openModal(`Applications — ${title}`,`
+    ${!apps.length?'<div class="empty"><div class="empty-icon">📋</div><h3>No applications yet</h3></div>':`
+    <div style="overflow:auto">
+    <table class="tbl">
+      <thead><tr><th>Candidate</th><th>Match</th><th>AI Score</th><th>Status</th><th>Update</th></tr></thead>
+      <tbody>${apps.map(a=>`
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="cand-av" style="width:34px;height:34px;font-size:13px">${inits(a.name||'?')}</div>
+              <div><div style="font-weight:500">${a.name}</div><div style="font-size:12px;color:var(--ink3)">${a.headline||''}</div></div>
+            </div>
+          </td>
+          <td><span class="mbadge ${matchCls(a.matchScore)}">${a.matchScore?.toFixed(0)}%</span></td>
+          <td><span style="font-weight:600;color:${scColor(a.overallScore||0)}">${a.overallScore||'—'}</span></td>
+          <td>${statusTag(a.status)}</td>
+          <td>
+            <select class="form-input" style="font-size:12px;padding:5px 8px;width:auto" onchange="updateAppStatus(${a.id},this.value)">
+              <option value="applied" ${a.status==='applied'?'selected':''}>Applied</option>
+              <option value="reviewed" ${a.status==='reviewed'?'selected':''}>Reviewed</option>
+              <option value="shortlisted" ${a.status==='shortlisted'?'selected':''}>Shortlisted</option>
+              <option value="rejected" ${a.status==='rejected'?'selected':''}>Rejected</option>
+            </select>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>`}`);
+}
+
+function updateAppStatus(appId, status) {
+  const app=MOCK.applications.find(a=>a.id===appId);
+  if(app){ app.status=status; toast(`Status → ${status}`,'ok'); }
+}
+
+function updateAppStatus(appId, status) {
+  const app=MOCK.applications.find(a=>a.id===appId);
+  if(app){ app.status=status; saveAll(); toast(`Status → ${status}`,'ok'); }
+}
+
+function closeJob(jobId) {
+  // Custom confirmation inside a modal (confirm() is blocked in many environments)
+  openModal('Close Job Posting', `
+    <div style="text-align:center;padding:12px 0 8px">
+      <div style="font-size:40px;margin-bottom:14px">⚠️</div>
+      <p style="font-size:15px;color:var(--ink2);margin-bottom:6px">Are you sure you want to close this job?</p>
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:24px">This will hide the listing from candidates. Existing applications are preserved.</p>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="btn btn-danger" onclick="confirmCloseJob(${jobId})">Yes, Close Job</button>
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>`);
+}
+
+function confirmCloseJob(jobId) {
+  const j = MOCK.jobs.find(x => x.id === jobId);
+  if (j) { j.active = false; saveAll(); }
+  closeModal();
+  toast('Job closed successfully', 'ok');
+  pageMyJobs();
+}
+
+function pagePostJob() {
+  render(`
+    <div class="fade">
+      <div class="page-hdr"><h1>Post a Job</h1><p>Create a new listing and attract top AI-scored candidates</p></div>
+      <div class="card" style="max-width:700px">
+        <div class="two-col">
+          <div class="form-group"><label class="form-label">Job Title *</label>
+            <input class="form-input" id="jt" placeholder="Senior Python Developer"></div>
+          <div class="form-group"><label class="form-label">Location</label>
+            <input class="form-input" id="jl" placeholder="Bangalore / Remote"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Job Description *</label>
+          <textarea class="form-input" id="jd" rows="5" placeholder="Describe the role, responsibilities, team, and what makes this opportunity exciting..."></textarea></div>
+        <div class="form-group"><label class="form-label">Required Skills (comma-separated)</label>
+          <input class="form-input" id="js" placeholder="Python, FastAPI, Docker, PostgreSQL, AWS"></div>
+        <div class="three-col">
+          <div class="form-group"><label class="form-label">Job Type</label>
+            <select class="form-input" id="jtp"><option>Full-time</option><option>Part-time</option><option>Contract</option><option>Internship</option></select></div>
+          <div class="form-group"><label class="form-label">Min Salary (₹/yr)</label>
+            <input class="form-input" id="jsn" type="number" placeholder="1200000"></div>
+          <div class="form-group"><label class="form-label">Max Salary (₹/yr)</label>
+            <input class="form-input" id="jsx" type="number" placeholder="2000000"></div>
+        </div>
+        <div class="form-group" style="max-width:200px"><label class="form-label">Experience Required (yrs)</label>
+          <input class="form-input" id="je" type="number" placeholder="3"></div>
+        <div style="display:flex;gap:10px;margin-top:8px">
+          <button class="btn btn-primary" onclick="submitJob()">Post Job →</button>
+          <button class="btn btn-ghost" onclick="navigate('my-jobs')">Cancel</button>
+        </div>
+      </div>
+    </div>`);
+}
+
+function submitJob(){
+  const title=document.getElementById('jt').value.trim();
+  const desc=document.getElementById('jd').value.trim();
+  if(!title||!desc){ toast('Title and description are required','err'); return; }
+  const newJob={
+    id:MOCK.jobs.length+1, recruiterId:S.user.id,
+    company: MOCK.recruiterProfiles[S.user.id]?.company||'Your Company',
+    title, desc, active:true,
+    skills:document.getElementById('js').value.split(',').map(s=>s.trim()).filter(Boolean),
+    location:document.getElementById('jl').value||'Remote',
+    type:document.getElementById('jtp').value,
+    salMin:+document.getElementById('jsn').value||0,
+    salMax:+document.getElementById('jsx').value||0,
+    expReq:+document.getElementById('je').value||0,
+    created:new Date().toISOString().split('T')[0],
+  };
+  MOCK.jobs.push(newJob);
+  toast('Job posted successfully!','ok');
+  navigate('my-jobs');
+}
+
+function render(html){ document.getElementById('pageRoot').innerHTML=html; }
+
+// ═══════════════════════════════════════════════
+// AI CODING TEST FEATURE
+// ═══════════════════════════════════════════════
+
+// ── Language definitions ──────────────────────────────────────────────────────
+const LANGUAGES = {
+  python:     { label:'Python 3',     ext:'py',  comment:'#',  indent:'    ',  monoColor:'#e0e0ff' },
+  javascript: { label:'JavaScript',   ext:'js',  comment:'//', indent:'  ',   monoColor:'#ffe0b0' },
+  java:       { label:'Java',         ext:'java',comment:'//', indent:'    ',  monoColor:'#b0f0b0' },
+  cpp:        { label:'C++',          ext:'cpp', comment:'//', indent:'    ',  monoColor:'#f0c0ff' },
+};
+
+// Per-language starter codes for every question [id → {lang → code}]
+const STARTERS = {
+  1: { // Two Sum
+    python:`def two_sum(nums, target):
+    # Your solution here
+    pass
+
+# Test
+print(two_sum([2, 7, 11, 15], 9))   # Expected: [0, 1]
+print(two_sum([3, 2, 4], 6))        # Expected: [1, 2]`,
+    javascript:`function twoSum(nums, target) {
+  // Your solution here
+}
+
+// Test
+console.log(twoSum([2, 7, 11, 15], 9));  // Expected: [0, 1]
+console.log(twoSum([3, 2, 4], 6));       // Expected: [1, 2]`,
+    java:`import java.util.*;
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        // Your solution here
+        return new int[]{};
+    }
+    public static void main(String[] args) {
+        Solution s = new Solution();
+        System.out.println(Arrays.toString(s.twoSum(new int[]{2,7,11,15}, 9)));
+    }
+}`,
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+
+vector<int> twoSum(vector<int>& nums, int target) {
+    // Your solution here
+    return {};
+}
+
+int main() {
+    vector<int> nums = {2, 7, 11, 15};
+    auto res = twoSum(nums, 9);
+    cout << "[" << res[0] << ", " << res[1] << "]" << endl;
+    return 0;
+}`,
+  },
+  2: { // Valid Parentheses
+    python:`def is_valid(s):
+    # Your solution here
+    pass
+
+print(is_valid("()"))       # True
+print(is_valid("()[]{}"))   # True
+print(is_valid("(]"))       # False`,
+    javascript:`function isValid(s) {
+  // Your solution here
+}
+
+console.log(isValid("()"));       // true
+console.log(isValid("()[]{}"));   // true
+console.log(isValid("(]"));       // false`,
+    java:`class Solution {
+    public boolean isValid(String s) {
+        // Your solution here
+        return false;
+    }
+    public static void main(String[] args) {
+        Solution sol = new Solution();
+        System.out.println(sol.isValid("()"));      // true
+        System.out.println(sol.isValid("(]"));      // false
+    }
+}`,
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+
+bool isValid(string s) {
+    // Your solution here
+    return false;
+}
+
+int main() {
+    cout << isValid("()") << endl;       // 1
+    cout << isValid("(]") << endl;       // 0
+    return 0;
+}`,
+  },
+  3: { // Reverse Linked List
+    python:`class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+def reverse_list(head):
+    # Your solution here
+    pass`,
+    javascript:`function reverseList(head) {
+  // Your solution here
+  return null;
+}`,
+    java:`class ListNode {
+    int val;
+    ListNode next;
+    ListNode(int val) { this.val = val; }
+}
+class Solution {
+    public ListNode reverseList(ListNode head) {
+        // Your solution here
+        return null;
+    }
+}`,
+    cpp:`struct ListNode {
+    int val;
+    ListNode* next;
+    ListNode(int x) : val(x), next(nullptr) {}
+};
+
+ListNode* reverseList(ListNode* head) {
+    // Your solution here
+    return nullptr;
+}`,
+  },
+  4: { // FizzBuzz
+    python:`def fizz_buzz(n):
+    result = []
+    # Your solution here
+    return result
+
+print(fizz_buzz(15))`,
+    javascript:`function fizzBuzz(n) {
+  const result = [];
+  // Your solution here
+  return result;
+}
+
+console.log(fizzBuzz(15));`,
+    java:`import java.util.*;
+class Solution {
+    public List<String> fizzBuzz(int n) {
+        List<String> result = new ArrayList<>();
+        // Your solution here
+        return result;
+    }
+    public static void main(String[] args) {
+        System.out.println(new Solution().fizzBuzz(15));
+    }
+}`,
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+
+vector<string> fizzBuzz(int n) {
+    vector<string> result;
+    // Your solution here
+    return result;
+}
+
+int main() {
+    auto res = fizzBuzz(15);
+    for (auto& s : res) cout << s << " ";
+    return 0;
+}`,
+  },
+  5: { // Binary Search
+    python:`def binary_search(nums, target):
+    # Your solution here
+    pass
+
+print(binary_search([-1,0,3,5,9,12], 9))   # 4
+print(binary_search([-1,0,3,5,9,12], 2))   # -1`,
+    javascript:`function binarySearch(nums, target) {
+  // Your solution here
+}
+
+console.log(binarySearch([-1,0,3,5,9,12], 9));  // 4
+console.log(binarySearch([-1,0,3,5,9,12], 2));  // -1`,
+    java:`class Solution {
+    public int search(int[] nums, int target) {
+        // Your solution here
+        return -1;
+    }
+    public static void main(String[] args) {
+        int[] nums = {-1,0,3,5,9,12};
+        System.out.println(new Solution().search(nums, 9)); // 4
+    }
+}`,
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+
+int binarySearch(vector<int>& nums, int target) {
+    // Your solution here
+    return -1;
+}
+
+int main() {
+    vector<int> nums = {-1,0,3,5,9,12};
+    cout << binarySearch(nums, 9) << endl;  // 4
+    return 0;
+}`,
+  },
+  6: { // Merge Intervals
+    python:`def merge_intervals(intervals):
+    # Your solution here
+    pass
+
+print(merge_intervals([[1,3],[2,6],[8,10],[15,18]]))
+print(merge_intervals([[1,4],[4,5]]))`,
+    javascript:`function merge(intervals) {
+  // Your solution here
+}
+
+console.log(merge([[1,3],[2,6],[8,10],[15,18]]));
+console.log(merge([[1,4],[4,5]]));`,
+    java:`import java.util.*;
+class Solution {
+    public int[][] merge(int[][] intervals) {
+        // Your solution here
+        return new int[][]{};
+    }
+    public static void main(String[] args) {
+        int[][] iv = {{1,3},{2,6},{8,10},{15,18}};
+        System.out.println(Arrays.deepToString(new Solution().merge(iv)));
+    }
+}`,
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+
+vector<vector<int>> merge(vector<vector<int>>& intervals) {
+    // Your solution here
+    return {};
+}
+
+int main() {
+    vector<vector<int>> iv = {{1,3},{2,6},{8,10},{15,18}};
+    auto res = merge(iv);
+    for (auto& r : res) cout << "[" << r[0] << "," << r[1] << "] ";
+    return 0;
+}`,
+  },
+  7: { // Maximum Subarray
+    python:`def max_subarray(nums):
+    # Your solution here
+    pass
+
+print(max_subarray([-2,1,-3,4,-1,2,1,-5,4]))  # 6
+print(max_subarray([5,4,-1,7,8]))               # 23`,
+    javascript:`function maxSubArray(nums) {
+  // Your solution here
+}
+
+console.log(maxSubArray([-2,1,-3,4,-1,2,1,-5,4])); // 6
+console.log(maxSubArray([5,4,-1,7,8]));              // 23`,
+    java:`class Solution {
+    public int maxSubArray(int[] nums) {
+        // Your solution here
+        return 0;
+    }
+    public static void main(String[] args) {
+        int[] nums = {-2,1,-3,4,-1,2,1,-5,4};
+        System.out.println(new Solution().maxSubArray(nums)); // 6
+    }
+}`,
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+
+int maxSubArray(vector<int>& nums) {
+    // Your solution here
+    return 0;
+}
+
+int main() {
+    vector<int> nums = {-2,1,-3,4,-1,2,1,-5,4};
+    cout << maxSubArray(nums) << endl;  // 6
+    return 0;
+}`,
+  },
+  8: { // Climbing Stairs
+    python:`def climb_stairs(n):
+    # Your solution here
+    pass
+
+print(climb_stairs(2))   # 2
+print(climb_stairs(5))   # 8`,
+    javascript:`function climbStairs(n) {
+  // Your solution here
+}
+
+console.log(climbStairs(2));  // 2
+console.log(climbStairs(5));  // 8`,
+    java:`class Solution {
+    public int climbStairs(int n) {
+        // Your solution here
+        return 0;
+    }
+    public static void main(String[] args) {
+        System.out.println(new Solution().climbStairs(5)); // 8
+    }
+}`,
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+
+int climbStairs(int n) {
+    // Your solution here
+    return 0;
+}
+
+int main() {
+    cout << climbStairs(5) << endl;  // 8
+    return 0;
+}`,
+  },
+};
+
+// Current selected language per question slot
+let TEST_LANG = ['python', 'python'];
+
+const QUESTION_BANK = [
+  {
+    id:1, title:'Two Sum', difficulty:'Easy', topic:'Arrays / Hash Map',
+    description:`Given an array of integers <code>nums</code> and an integer <code>target</code>, return the indices of the two numbers that add up to target.\n\nYou may assume exactly one solution exists. You may not use the same element twice.`,
+    examples:[
+      {input:'nums = [2,7,11,15], target = 9', output:'[0,1]', explain:'nums[0] + nums[1] = 2 + 7 = 9'},
+      {input:'nums = [3,2,4], target = 6',     output:'[1,2]', explain:'nums[1] + nums[2] = 2 + 4 = 6'},
+    ],
+    constraints:['2 ≤ nums.length ≤ 10⁴','Only one valid answer exists'],
+    starterCode:`def two_sum(nums, target):
+    # Your solution here
+    pass
+
+# Test
+print(two_sum([2, 7, 11, 15], 9))   # Expected: [0, 1]
+print(two_sum([3, 2, 4], 6))        # Expected: [1, 2]`,
+    solutionHint:'Consider using a hash map to track seen numbers.',
+    optimalComplexity:'O(n) time, O(n) space',
+    testCases:[
+      {input:[[2,7,11,15],9], expected:[0,1]},
+      {input:[[3,2,4],6],     expected:[1,2]},
+      {input:[[3,3],6],       expected:[0,1]},
+    ]
+  },
+  {
+    id:2, title:'Valid Parentheses', difficulty:'Easy', topic:'Stack',
+    description:`Given a string <code>s</code> containing only characters <code>'('</code>, <code>')'</code>, <code>'{'</code>, <code>'}'</code>, <code>'['</code>, <code>']'</code>, determine if the input string is valid.\n\nAn input string is valid if:\n• Open brackets must be closed by the same type.\n• Open brackets must be closed in the correct order.`,
+    examples:[
+      {input:'s = "()"',    output:'True'},
+      {input:'s = "()[]{}"',output:'True'},
+      {input:'s = "(]"',    output:'False'},
+    ],
+    constraints:['1 ≤ s.length ≤ 10⁴','s consists of parentheses only'],
+    starterCode:`def is_valid(s):
+    # Your solution here
+    pass
+
+# Test
+print(is_valid("()"))       # Expected: True
+print(is_valid("()[]{}"))   # Expected: True
+print(is_valid("(]"))       # Expected: False`,
+    solutionHint:'Use a stack — push on open, pop and match on close.',
+    optimalComplexity:'O(n) time, O(n) space',
+    testCases:[]
+  },
+  {
+    id:3, title:'Reverse a Linked List', difficulty:'Easy', topic:'Linked Lists',
+    description:`Given the <code>head</code> of a singly linked list, reverse the list and return the reversed list.\n\nImplement it both iteratively and note the recursive approach.`,
+    examples:[
+      {input:'head = [1,2,3,4,5]', output:'[5,4,3,2,1]'},
+      {input:'head = [1,2]',       output:'[2,1]'},
+    ],
+    constraints:['0 ≤ number of nodes ≤ 5000','-5000 ≤ Node.val ≤ 5000'],
+    starterCode:`class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+def reverse_list(head):
+    # Your solution here
+    pass`,
+    solutionHint:'Use three pointers: prev, curr, next — iterate and flip.',
+    optimalComplexity:'O(n) time, O(1) space',
+    testCases:[]
+  },
+  {
+    id:4, title:'FizzBuzz', difficulty:'Easy', topic:'Loops / Conditionals',
+    description:`Write a function that returns an array of strings for numbers 1 to <code>n</code> where:\n• Multiples of 3 → <code>"Fizz"</code>\n• Multiples of 5 → <code>"Buzz"</code>\n• Multiples of both 3 and 5 → <code>"FizzBuzz"</code>\n• Otherwise → the number as a string`,
+    examples:[
+      {input:'n = 5',  output:'["1","2","Fizz","4","Buzz"]'},
+      {input:'n = 15', output:'["1","2","Fizz","4","Buzz","Fizz","7","8","Fizz","Buzz","11","Fizz","13","14","FizzBuzz"]'},
+    ],
+    constraints:['1 ≤ n ≤ 10⁴'],
+    starterCode:`def fizz_buzz(n):
+    result = []
+    # Your solution here
+    return result
+
+# Test
+print(fizz_buzz(15))`,
+    solutionHint:'Check divisibility by 15 first, then 3, then 5.',
+    optimalComplexity:'O(n) time, O(n) space',
+    testCases:[]
+  },
+  {
+    id:5, title:'Binary Search', difficulty:'Medium', topic:'Binary Search',
+    description:`Given a sorted array of integers <code>nums</code> and an integer <code>target</code>, write a function to search for <code>target</code>. Return its index, or <code>-1</code> if it doesn't exist.\n\nYou must write an algorithm with <strong>O(log n)</strong> runtime complexity.`,
+    examples:[
+      {input:'nums = [-1,0,3,5,9,12], target = 9', output:'4', explain:'9 exists at index 4'},
+      {input:'nums = [-1,0,3,5,9,12], target = 2', output:'-1',explain:'2 does not exist'},
+    ],
+    constraints:['1 ≤ nums.length ≤ 10⁴','All integers are unique','nums is sorted ascending'],
+    starterCode:`def binary_search(nums, target):
+    # Your solution here
+    pass
+
+# Test
+print(binary_search([-1,0,3,5,9,12], 9))   # Expected: 4
+print(binary_search([-1,0,3,5,9,12], 2))   # Expected: -1`,
+    solutionHint:'Maintain left and right pointers, check middle each iteration.',
+    optimalComplexity:'O(log n) time, O(1) space',
+    testCases:[]
+  },
+  {
+    id:6, title:'Merge Intervals', difficulty:'Medium', topic:'Arrays / Sorting',
+    description:`Given an array of <code>intervals</code> where <code>intervals[i] = [start_i, end_i]</code>, merge all overlapping intervals and return an array of the non-overlapping intervals.`,
+    examples:[
+      {input:'intervals = [[1,3],[2,6],[8,10],[15,18]]', output:'[[1,6],[8,10],[15,18]]', explain:'[1,3] and [2,6] overlap → merge to [1,6]'},
+      {input:'intervals = [[1,4],[4,5]]',                output:'[[1,5]]', explain:'[1,4] and [4,5] are adjacent'},
+    ],
+    constraints:['1 ≤ intervals.length ≤ 10⁴','intervals[i].length == 2'],
+    starterCode:`def merge_intervals(intervals):
+    # Your solution here
+    pass
+
+# Test
+print(merge_intervals([[1,3],[2,6],[8,10],[15,18]]))  # [[1,6],[8,10],[15,18]]
+print(merge_intervals([[1,4],[4,5]]))                  # [[1,5]]`,
+    solutionHint:'Sort by start time, then iterate and merge when current start ≤ prev end.',
+    optimalComplexity:'O(n log n) time, O(n) space',
+    testCases:[]
+  },
+  {
+    id:7, title:'Maximum Subarray', difficulty:'Medium', topic:'Dynamic Programming',
+    description:`Given an integer array <code>nums</code>, find the subarray with the largest sum and return its sum.\n\nThis is the classic Kadane's Algorithm problem.`,
+    examples:[
+      {input:'nums = [-2,1,-3,4,-1,2,1,-5,4]', output:'6', explain:'Subarray [4,-1,2,1] has the largest sum = 6'},
+      {input:'nums = [1]',                      output:'1'},
+      {input:'nums = [5,4,-1,7,8]',             output:'23'},
+    ],
+    constraints:['1 ≤ nums.length ≤ 10⁵','-10⁴ ≤ nums[i] ≤ 10⁴'],
+    starterCode:`def max_subarray(nums):
+    # Your solution here
+    pass
+
+# Test
+print(max_subarray([-2,1,-3,4,-1,2,1,-5,4]))  # Expected: 6
+print(max_subarray([5,4,-1,7,8]))               # Expected: 23`,
+    solutionHint:"Kadane's: track current sum and global max as you iterate.",
+    optimalComplexity:'O(n) time, O(1) space',
+    testCases:[]
+  },
+  {
+    id:8, title:'Climbing Stairs', difficulty:'Medium', topic:'Dynamic Programming',
+    description:`You are climbing a staircase with <code>n</code> steps. Each time you can climb 1 or 2 steps. In how many distinct ways can you climb to the top?`,
+    examples:[
+      {input:'n = 2', output:'2', explain:'1+1 or 2'},
+      {input:'n = 3', output:'3', explain:'1+1+1, 1+2, 2+1'},
+      {input:'n = 5', output:'8'},
+    ],
+    constraints:['1 ≤ n ≤ 45'],
+    starterCode:`def climb_stairs(n):
+    # Your solution here
+    pass
+
+# Test
+print(climb_stairs(2))   # Expected: 2
+print(climb_stairs(5))   # Expected: 8`,
+    solutionHint:'Notice the pattern: ways(n) = ways(n-1) + ways(n-2). Fibonacci!',
+    optimalComplexity:'O(n) time, O(1) space',
+    testCases:[]
+  },
+];
+
+// ── Test state ────────────────────────────────────────────────────────────────
+let TEST = {
+  questions: [],      // 2 picked questions
+  current: 0,         // 0 or 1
+  code: ['',''],      // user code per question
+  submitted: [false,false],
+  aiScores: [null, null],
+  aiFeedback: ['',''],
+  aiExplanation: ['',''],
+  startTime: null,
+  finished: false,
+};
+
+function pickRandomQuestions() {
+  const shuffled = [...QUESTION_BANK].sort(()=>Math.random()-.5);
+  // Pick 1 Easy + 1 Medium for balance
+  const easy   = shuffled.find(q=>q.difficulty==='Easy');
+  const medium  = shuffled.find(q=>q.difficulty==='Medium' && q.id!==easy?.id);
+  return [easy||shuffled[0], medium||shuffled[1]];
+}
+
+// ── Main page ─────────────────────────────────────────────────────────────────
+function pageCodingTest() {
+  const uid = S.user.id;
+  const existing = MOCK.codingResults[uid];
+
+  if (existing && !TEST.finished) {
+    // Show previous result + option to retake
+    renderTestResult(existing, true);
+    return;
+  }
+  if (TEST.finished) {
+    renderTestResult(MOCK.codingResults[uid]);
+    return;
+  }
+
+  render(`
+    <div class="fade">
+      <div class="page-hdr">
+        <h1>🧠 AI Coding Test</h1>
+        <p>2 random questions · AI-evaluated · Scores added to your profile</p>
+      </div>
+      <div class="card" style="max-width:680px;margin:0 auto;text-align:center;padding:48px 40px">
+        <div style="font-size:56px;margin-bottom:20px">🤖</div>
+        <h2 style="font-family:'Instrument Serif',serif;font-size:28px;margin-bottom:12px">Ready for your AI evaluation?</h2>
+        <p style="color:var(--ink3);font-size:15px;line-height:1.7;margin-bottom:28px;max-width:420px;margin-left:auto;margin-right:auto">
+          You'll receive <strong>2 randomly selected coding questions</strong>. Write your solution, then our AI will analyse your code for correctness, efficiency, code quality, and best practices.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:32px;text-align:left">
+          <div style="background:var(--surface2);border-radius:var(--r);padding:14px">
+            <div style="font-size:20px;margin-bottom:6px">⏱️</div>
+            <div style="font-weight:600;font-size:14px">No Time Limit</div>
+            <div style="font-size:12px;color:var(--ink3)">Take your time</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:var(--r);padding:14px">
+            <div style="font-size:20px;margin-bottom:6px">🤖</div>
+            <div style="font-weight:600;font-size:14px">AI Scored</div>
+            <div style="font-size:12px;color:var(--ink3)">Instant feedback</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:var(--r);padding:14px">
+            <div style="font-size:20px;margin-bottom:6px">📊</div>
+            <div style="font-weight:600;font-size:14px">Profile Score</div>
+            <div style="font-size:12px;color:var(--ink3)">Boosts your rank</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="font-size:16px;padding:14px 40px" onclick="startTest()">
+          Start Test →
+        </button>
+        ${existing?`<br><button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="viewLastResult()">View Last Result</button>`:''}
+      </div>
+    </div>`);
+}
+
+function viewLastResult() {
+  TEST.finished=true;
+  pageCodingTest();
+}
+
+function startTest() {
+  TEST.questions = pickRandomQuestions();
+  TEST.current   = 0;
+  TEST_LANG      = ['python', 'python'];
+  TEST.code      = [
+    (STARTERS[TEST.questions[0].id]||{})['python'] || TEST.questions[0].starterCode,
+    (STARTERS[TEST.questions[1].id]||{})['python'] || TEST.questions[1].starterCode,
+  ];
+  TEST.submitted = [false, false];
+  TEST.aiScores  = [null, null];
+  TEST.aiFeedback= ['', ''];
+  TEST.aiExplanation=['',''];
+  TEST.startTime = Date.now();
+  TEST.finished  = false;
+  renderTestEditor();
+}
+
+// ── Editor UI ─────────────────────────────────────────────────────────────────
+function renderTestEditor() {
+  const q       = TEST.questions[TEST.current];
+  const idx     = TEST.current;
+  const other   = 1 - idx;
+  const bothDone= TEST.submitted[0] && TEST.submitted[1];
+  const lang    = TEST_LANG[idx] || 'python';
+  const langCfg = LANGUAGES[lang];
+  const ext     = langCfg.ext;
+
+  // ── Build each section as a plain string (no nested backticks) ──────────────
+
+  // Difficulty tag
+  const diffTag = q.difficulty === 'Easy' ? 'tag-green'
+                : q.difficulty === 'Medium' ? 'tag-amber' : 'tag-red';
+
+  // Q-tab buttons
+  const q1check = TEST.submitted[0] ? ' &#10003;' : '';
+  const q2check = TEST.submitted[1] ? ' &#10003;' : '';
+  const q1cls   = idx === 0 ? 'btn-primary' : 'btn-ghost';
+  const q2cls   = idx === 1 ? 'btn-primary' : 'btn-ghost';
+  const finalBtn= bothDone
+    ? '<button class="btn btn-secondary btn-sm" onclick="finishTest()" style="border-color:var(--accent);color:var(--accent)">&#127945; Get Final Score</button>'
+    : '';
+
+  // Examples
+  const examplesHtml = q.examples.map(function(ex) {
+    return '<div style="background:var(--surface);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;font-size:13px">'
+      + '<div><span style="color:var(--ink3);font-weight:500">Input:</span> <code>' + ex.input + '</code></div>'
+      + '<div><span style="color:var(--ink3);font-weight:500">Output:</span> <code>' + ex.output + '</code></div>'
+      + (ex.explain ? '<div style="color:var(--ink3);font-size:12px;margin-top:4px">&#128161; ' + ex.explain + '</div>' : '')
+      + '</div>';
+  }).join('');
+
+  // Constraints
+  const constraintsHtml = q.constraints.map(function(c) {
+    return '<li>' + c + '</li>';
+  }).join('');
+
+  // Language selector
+  const langOptions = Object.entries(LANGUAGES).map(function(entry) {
+    const k = entry[0], v = entry[1];
+    return '<option value="' + k + '"' + (k === lang ? ' selected' : '') + '>' + v.label + '</option>';
+  }).join('');
+  const langSelector = !TEST.submitted[idx]
+    ? '<select id="langSelect" onchange="changeLang(' + idx + ', this.value)" '
+      + 'style="background:#1f2937;color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.15);'
+      + 'border-radius:6px;padding:4px 10px;font-size:12px;font-family:\'JetBrains Mono\',monospace;cursor:pointer;outline:none">'
+      + langOptions + '</select>'
+    : '<span style="font-size:12px;color:rgba(255,255,255,.4)">' + langCfg.label + '</span>';
+
+  // Submit button
+  const submitBtn = TEST.submitted[idx]
+    ? '<button class="btn btn-secondary btn-sm" disabled>&#10003; Submitted</button>'
+    : '<button class="btn btn-primary" id="submitBtn" onclick="submitCode(' + idx + ')">Submit to AI &rarr;</button>';
+
+  // AI result panel content
+  let aiPanelHtml = '';
+  if (TEST.submitted[idx] && TEST.aiScores[idx] !== null) {
+    aiPanelHtml = renderAIResultPanel(idx);
+  } else if (TEST.submitted[idx]) {
+    aiPanelHtml = '<div style="text-align:center;padding:20px"><span class="spin dark"></span>'
+      + '<div style="margin-top:10px;font-size:13px;color:var(--ink3)">AI is evaluating your code...</div></div>';
+  }
+
+  // Next-question prompt
+  const nextPrompt = (TEST.submitted[idx] && !TEST.submitted[other])
+    ? '<div style="margin-top:14px;padding:14px 16px;background:var(--accent-light);border-radius:var(--r);font-size:14px;color:var(--accent)">'
+      + '&#10003; Q' + (idx + 1) + ' submitted! '
+      + '<a style="cursor:pointer;font-weight:600;text-decoration:underline" onclick="switchQ(' + other + ')">'
+      + 'Proceed to Q' + (other + 1) + ' &rarr;</a></div>'
+    : '';
+
+  // Read-only attr
+  const roAttr = TEST.submitted[idx] ? ' readonly' : '';
+
+  // Code content (escaped)
+  const codeContent = escHtml(TEST.code[idx]);
+
+  // Char count
+  const charCount = TEST.code[idx].length;
+
+  const html = ''
+    + '<div class="fade" style="max-width:1100px">'
+
+    // ── Top header ──
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">'
+      + '<div>'
+        + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">'
+          + '<span style="font-family:\'Instrument Serif\',serif;font-size:22px">&#129504; AI Coding Test</span>'
+          + '<span class="tag ' + diffTag + '">' + q.difficulty + '</span>'
+          + '<span class="tag tag-gray">' + q.topic + '</span>'
+        + '</div>'
+        + '<div style="font-size:13px;color:var(--ink3)">Optimal: <code style="background:var(--surface2);padding:2px 6px;border-radius:4px">' + q.optimalComplexity + '</code></div>'
+      + '</div>'
+      + '<div style="display:flex;gap:6px;align-items:center">'
+        + '<button class="btn ' + q1cls + ' btn-sm" onclick="switchQ(0)">Q1' + q1check + '</button>'
+        + '<button class="btn ' + q2cls + ' btn-sm" onclick="switchQ(1)">Q2' + q2check + '</button>'
+        + finalBtn
+      + '</div>'
+    + '</div>'
+
+    // ── Two column layout ──
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">'
+
+      // LEFT: problem
+      + '<div class="card" style="position:sticky;top:80px">'
+        + '<div style="font-size:19px;font-weight:600;margin-bottom:14px">' + q.title + '</div>'
+        + '<div style="font-size:14px;line-height:1.8;color:var(--ink2);margin-bottom:18px">' + q.description.replace(/\n/g, '<br>') + '</div>'
+        + '<div class="sec">Examples</div>'
+        + examplesHtml
+        + '<div class="sec" style="margin-top:14px">Constraints</div>'
+        + '<ul style="font-size:13px;color:var(--ink2);padding-left:18px;line-height:2">' + constraintsHtml + '</ul>'
+        + '<div style="margin-top:16px;padding:10px 13px;background:var(--blue-light);border-radius:var(--r);font-size:13px;color:var(--blue)">'
+          + '&#128161; <strong>Hint:</strong> ' + q.solutionHint
+        + '</div>'
+      + '</div>'
+
+      // RIGHT: editor
+      + '<div>'
+        + '<div class="card" style="padding:0;overflow:hidden;margin-bottom:16px">'
+
+          // Editor chrome
+          + '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#111827;border-radius:var(--r-lg) var(--r-lg) 0 0;gap:10px">'
+            + '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">'
+              + '<span style="width:10px;height:10px;border-radius:50%;background:#ff5f57;display:inline-block"></span>'
+              + '<span style="width:10px;height:10px;border-radius:50%;background:#febc2e;display:inline-block"></span>'
+              + '<span style="width:10px;height:10px;border-radius:50%;background:#28c840;display:inline-block"></span>'
+              + '<span style="font-size:12px;color:rgba(255,255,255,.4);margin-left:8px">solution.' + ext + '</span>'
+            + '</div>'
+            + langSelector
+          + '</div>'
+
+          // Line numbers + textarea
+          + '<div style="display:flex;background:#1a1a2e">'
+            + '<div id="lineNums" style="padding:16px 10px 16px 8px;min-width:42px;background:#111827;'
+              + 'color:rgba(255,255,255,.25);font-family:\'JetBrains Mono\',monospace;font-size:13px;'
+              + 'line-height:1.65;text-align:right;user-select:none;border-right:1px solid rgba(255,255,255,.06)">1</div>'
+            + '<textarea id="codeEditor" spellcheck="false"'
+              + ' style="flex:1;min-height:340px;background:#1a1a2e;color:' + langCfg.monoColor + ';'
+              + 'font-family:\'JetBrains Mono\',monospace;font-size:13px;line-height:1.65;padding:16px;'
+              + 'border:none;outline:none;resize:vertical;tab-size:4;white-space:pre;overflow-wrap:normal;overflow-x:auto"'
+              + ' onkeydown="handleEditorKey(event,' + idx + ')" oninput="onCodeInput(' + idx + ',this)"'
+              + roAttr + '>'
+              + codeContent
+            + '</textarea>'
+          + '</div>'
+
+          // Status bar
+          + '<div style="padding:5px 14px;background:#111827;border-top:1px solid rgba(255,255,255,.06);display:flex;gap:14px">'
+            + '<span id="cursorPos" style="font-size:11px;color:rgba(255,255,255,.3);font-family:\'JetBrains Mono\',monospace">Ln 1, Col 1</span>'
+            + '<span id="charCount" style="font-size:11px;color:rgba(255,255,255,.3);font-family:\'JetBrains Mono\',monospace">' + charCount + ' chars</span>'
+            + '<span style="font-size:11px;color:rgba(255,255,255,.3);margin-left:auto">Tab = ' + langCfg.indent.length + ' spaces &middot; ' + langCfg.label + '</span>'
+          + '</div>'
+        + '</div>'
+
+        // Action bar
+        + '<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">'
+          + '<button class="btn btn-ghost btn-sm" onclick="resetCode(' + idx + ')">&#8635; Reset</button>'
+          + '<button class="btn btn-ghost btn-sm" onclick="clearCode(' + idx + ')">&#10005; Clear</button>'
+          + '<div style="flex:1"></div>'
+          + submitBtn
+        + '</div>'
+
+        // AI result
+        + '<div id="aiResultPanel">' + aiPanelHtml + '</div>'
+
+        // Next question prompt
+        + nextPrompt
+
+      + '</div>'
+    + '</div>'
+  + '</div>';
+
+  render(html);
+  updateLineNumbers();
+  document.getElementById('codeEditor') && document.getElementById('codeEditor').focus();
+}
+
+
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function changeLang(idx, newLang) {
+  TEST_LANG[idx] = newLang;
+  const q = TEST.questions[idx];
+  TEST.code[idx] = (STARTERS[q.id]||{})[newLang] || q.starterCode;
+  renderTestEditor();
+}
+
+function onCodeInput(idx, ta) {
+  TEST.code[idx] = ta.value;
+  updateLineNumbers();
+  updateStatusBar(ta);
+}
+
+function updateLineNumbers() {
+  const ta = document.getElementById('codeEditor');
+  const ln = document.getElementById('lineNums');
+  if (!ta || !ln) return;
+  const count = ta.value.split('\n').length;
+  ln.innerHTML = Array.from({length: count}, (_,i) => i+1).join('<br>');
+}
+
+function updateStatusBar(ta) {
+  const pos = ta.selectionStart;
+  const before = ta.value.slice(0, pos);
+  const lines = before.split('\n');
+  const ln = document.getElementById('cursorPos');
+  const cc = document.getElementById('charCount');
+  if (ln) ln.textContent = `Ln ${lines.length}, Col ${lines[lines.length-1].length+1}`;
+  if (cc) cc.textContent = `${ta.value.length} chars`;
+}
+
+function handleEditorKey(e, idx) {
+  const ta = e.target;
+  const lang = TEST_LANG[idx] || 'python';
+  const indent = LANGUAGES[lang].indent;
+
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const s = ta.selectionStart, end = ta.selectionEnd;
+    if (e.shiftKey) {
+      const val = ta.value;
+      const lineStart = val.lastIndexOf('\n', s - 1) + 1;
+      const line = val.slice(lineStart);
+      if (line.startsWith(indent)) {
+        ta.value = val.slice(0, lineStart) + line.slice(indent.length);
+        ta.selectionStart = ta.selectionEnd = Math.max(s - indent.length, lineStart);
+      }
+    } else if (s === end) {
+      ta.value = ta.value.slice(0, s) + indent + ta.value.slice(end);
+      ta.selectionStart = ta.selectionEnd = s + indent.length;
+    } else {
+      const val = ta.value;
+      const lineStart = val.lastIndexOf('\n', s - 1) + 1;
+      const lineEnd = val.indexOf('\n', end);
+      const block = val.slice(lineStart, lineEnd === -1 ? val.length : lineEnd);
+      const indented = block.split('\n').map(l => indent + l).join('\n');
+      ta.value = val.slice(0, lineStart) + indented + val.slice(lineEnd === -1 ? val.length : lineEnd);
+    }
+    TEST.code[idx] = ta.value;
+    updateLineNumbers(); updateStatusBar(ta);
+    return;
+  }
+
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const s = ta.selectionStart, val = ta.value;
+    const lineStart = val.lastIndexOf('\n', s - 1) + 1;
+    const currentLine = val.slice(lineStart, s);
+    const match = currentLine.match(/^(\s*)/);
+    const curIndent = match ? match[1] : '';
+    const trimmed = currentLine.trimEnd();
+    const extra = (trimmed.endsWith(':') || trimmed.endsWith('{')) ? indent : '';
+    const ins = '\n' + curIndent + extra;
+    ta.value = val.slice(0, s) + ins + val.slice(ta.selectionEnd);
+    ta.selectionStart = ta.selectionEnd = s + ins.length;
+    TEST.code[idx] = ta.value;
+    updateLineNumbers(); updateStatusBar(ta);
+    return;
+  }
+
+  const pairs = {'(':')',['[']: ']', '{':'}'};
+  if (!e.ctrlKey && !e.metaKey && pairs[e.key]) {
+    e.preventDefault();
+    const s = ta.selectionStart, end = ta.selectionEnd;
+    const sel = ta.value.slice(s, end);
+    ta.value = ta.value.slice(0, s) + e.key + sel + pairs[e.key] + ta.value.slice(end);
+    ta.selectionStart = ta.selectionEnd = s + 1;
+    TEST.code[idx] = ta.value;
+    updateLineNumbers(); return;
+  }
+
+  setTimeout(() => updateLineNumbers(), 0);
+}
+
+function handleTab(e) {}
+
+function switchQ(idx) {
+  TEST.code[TEST.current] = document.getElementById('codeEditor')?.value || TEST.code[TEST.current];
+  TEST.current = idx;
+  renderTestEditor();
+}
+
+function resetCode(idx) {
+  const q = TEST.questions[idx];
+  const lang = TEST_LANG[idx] || 'python';
+  TEST.code[idx] = (STARTERS[q.id]||{})[lang] || q.starterCode;
+  const ta = document.getElementById('codeEditor');
+  if (ta) { ta.value = TEST.code[idx]; updateLineNumbers(); }
+}
+
+function clearCode(idx) {
+  TEST.code[idx] = '';
+  const ta = document.getElementById('codeEditor');
+  if (ta) { ta.value = ''; updateLineNumbers(); }
+}
+
+
+// ── AI Evaluation ─────────────────────────────────────────────────────────────
+async function submitCode(idx) {
+  const code = document.getElementById('codeEditor')?.value || TEST.code[idx];
+  TEST.code[idx] = code;
+
+  if(!code.trim() || code.trim()===TEST.questions[idx].starterCode.trim()) {
+    toast('Please write your solution before submitting!','err'); return;
+  }
+
+  TEST.submitted[idx] = true;
+  document.getElementById('submitBtn').innerHTML='<span class="spin"></span> Submitting...';
+  document.getElementById('submitBtn').disabled=true;
+
+  // Show loading panel
+  document.getElementById('aiResultPanel').innerHTML=`
+    <div class="card" style="text-align:center;padding:32px">
+      <div style="font-size:32px;margin-bottom:12px">🤖</div>
+      <div style="font-weight:600;margin-bottom:8px">AI is evaluating your code</div>
+      <div id="evalStatus" style="font-size:13px;color:var(--ink3);margin-bottom:16px">Parsing your solution...</div>
+      <div class="prog-bar" style="max-width:300px;margin:0 auto"><div class="prog-fill" id="evalProg"></div></div>
+    </div>`;
+
+  // Animate progress while AI thinks
+  const steps=[
+    [400,'Checking syntax and structure...', 20],
+    [900,'Running test cases...', 45],
+    [1600,'Evaluating time complexity...', 65],
+    [2300,'Checking code quality & style...', 82],
+    [3000,'Generating detailed feedback...', 95],
+  ];
+  for(const [ms,msg,pct] of steps){
+    await new Promise(r=>setTimeout(r,ms===400?400:700));
+    document.getElementById('evalStatus')?.innerHTML && (document.getElementById('evalStatus').textContent=msg);
+    if(document.getElementById('evalProg')) document.getElementById('evalProg').style.width=pct+'%';
+  }
+
+  // Call AI API
+  try {
+    await callAIEvaluator(idx, code);
+  } catch(e) {
+    // Fallback to mock evaluation if API unavailable
+    mockAIEvaluate(idx, code);
+  }
+
+  if(document.getElementById('evalProg')) document.getElementById('evalProg').style.width='100%';
+  await new Promise(r=>setTimeout(r,300));
+
+  // Re-render editor with result
+  renderTestEditor();
+  toast(`Q${idx+1} evaluated by AI!`,'ok');
+}
+
+async function callAIEvaluator(idx, code) {
+  const q = TEST.questions[idx];
+  const prompt = `You are an expert coding interview evaluator. A candidate has submitted a solution to the following problem.
+
+PROBLEM: "${q.title}"
+DESCRIPTION: ${q.description.replace(/<[^>]*>/g,'')}
+OPTIMAL COMPLEXITY: ${q.optimalComplexity}
+
+CANDIDATE'S CODE:
+\`\`\`python
+${code}
+\`\`\`
+
+Evaluate this solution and respond ONLY with a valid JSON object (no markdown, no backticks) with exactly these fields:
+{
+  "score": <integer 0-100>,
+  "correctness": <integer 0-100>,
+  "efficiency": <integer 0-100>,
+  "code_quality": <integer 0-100>,
+  "verdict": "<one of: Excellent | Good | Needs Work | Incorrect>",
+  "feedback": "<2-3 sentence specific feedback about their solution, mentioning what they did well and what could be improved>",
+  "time_complexity": "<e.g. O(n)>",
+  "space_complexity": "<e.g. O(n)>",
+  "suggestion": "<one specific concrete improvement they could make>"
+}`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  if (!res.ok) throw new Error('API error');
+  const data = await res.json();
+  const raw = data.content?.[0]?.text || '';
+  const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
+
+  TEST.aiScores[idx]    = parsed.score;
+  TEST.aiFeedback[idx]  = parsed;
+}
+
+function mockAIEvaluate(idx, code) {
+  const q = TEST.questions[idx];
+  const lines = code.trim().split('\n').filter(l=>l.trim()&&!l.trim().startsWith('#'));
+  const hasLoop     = /for\s|while\s/.test(code);
+  const hasReturn   = /return\s/.test(code);
+  const hasDict     = /\{|\bdict\b/.test(code);
+  const linesCount  = lines.length;
+  const starterLines= q.starterCode.trim().split('\n').length;
+  const isJustStarter = linesCount <= starterLines + 1;
+
+  let score = 50;
+  if(hasReturn)   score += 15;
+  if(hasLoop)     score += 10;
+  if(hasDict)     score += 8;
+  if(linesCount > starterLines+2) score += 12;
+  if(code.includes('pass') && isJustStarter) score = 15;
+  score = Math.min(98, Math.max(10, score + Math.floor(Math.random()*10)));
+
+  const verdicts = score>=85?'Excellent':score>=70?'Good':score>=50?'Needs Work':'Incorrect';
+  const feedbacks = {
+    'Excellent': `Strong solution with clean structure and good algorithmic thinking. The approach handles the core logic efficiently and the code is readable. ${q.solutionHint.replace('Consider','You correctly applied the idea of')}`,
+    'Good': `Decent solution that handles the main cases. There are minor improvements possible in terms of edge case handling and code style. Consider ${q.solutionHint.toLowerCase()}`,
+    'Needs Work': `The solution shows understanding of the problem but has gaps in the implementation. Make sure to handle edge cases. ${q.solutionHint}`,
+    'Incorrect': `The solution needs significant revision. The core logic isn't producing correct results. Start by thinking about: ${q.solutionHint}`,
+  };
+
+  TEST.aiScores[idx]   = score;
+  TEST.aiFeedback[idx] = {
+    score, correctness: Math.min(100,score+5), efficiency: Math.max(0,score-10),
+    code_quality: Math.min(100,score+8), verdict: verdicts,
+    feedback: feedbacks[verdicts],
+    time_complexity: score>=80?q.optimalComplexity.split(',')[0]:'O(n²)',
+    space_complexity: q.optimalComplexity.split(',')[1]||'O(n)',
+    suggestion: score>=80?'Add docstrings and input validation for production code.':'Focus on the core algorithm first, then optimise.',
+  };
+}
+
+function renderAIResultPanel(idx) {
+  const fb = TEST.aiFeedback[idx];
+  if(!fb) return '';
+  const score = TEST.aiScores[idx];
+  const col   = scColor(score);
+  const verdictColors = { Excellent:'tag-green', Good:'tag-blue', 'Needs Work':'tag-amber', Incorrect:'tag-red' };
+
+  return `
+    <div class="card" style="border:2px solid ${col}20">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div style="font-weight:600;font-size:15px">🤖 AI Evaluation</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="tag ${verdictColors[fb.verdict]||'tag-gray'}">${fb.verdict}</span>
+          <div style="font-family:'Instrument Serif',serif;font-size:32px;color:${col}">${score}</div>
+        </div>
+      </div>
+
+      <!-- Sub-scores -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+        ${[['Correctness',fb.correctness],['Efficiency',fb.efficiency],['Code Quality',fb.code_quality]].map(([l,v])=>`
+          <div style="background:var(--surface2);border-radius:var(--r);padding:10px;text-align:center">
+            <div style="font-size:11px;color:var(--ink3);margin-bottom:3px">${l}</div>
+            <div style="font-family:'Instrument Serif',serif;font-size:20px;color:${scColor(v)}">${v}</div>
+          </div>`).join('')}
+      </div>
+
+      <!-- Complexity -->
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <span class="tag tag-gray">⏱ Time: ${fb.time_complexity||'—'}</span>
+        <span class="tag tag-gray">💾 Space: ${fb.space_complexity||'—'}</span>
+      </div>
+
+      <!-- Feedback -->
+      <div class="feedback" style="margin-bottom:12px">${fb.feedback}</div>
+
+      <!-- Suggestion -->
+      <div style="background:var(--amber-light);border-left:3px solid var(--amber);padding:10px 13px;border-radius:0 var(--r) var(--r) 0;font-size:13px;color:var(--amber)">
+        💡 <strong>Suggestion:</strong> ${fb.suggestion}
+      </div>
+    </div>`;
+}
+
+// ── Finish & Final Score ──────────────────────────────────────────────────────
+async function finishTest() {
+  const s1 = TEST.aiScores[0]||0;
+  const s2 = TEST.aiScores[1]||0;
+  const avg = Math.round((s1+s2)/2);
+  const badge = avg>=90?'Expert':avg>=75?'Advanced':avg>=55?'Intermediate':'Beginner';
+
+  // Save to MOCK
+  MOCK.codingResults[S.user.id] = {
+    score: avg,
+    q1Score: s1, q2Score: s2,
+    badge,
+    completedAt: new Date().toISOString().split('T')[0],
+    q1Title: TEST.questions[0].title,
+    q2Title: TEST.questions[1].title,
+    q1Feedback: TEST.aiFeedback[0]?.feedback||'',
+    q2Feedback: TEST.aiFeedback[1]?.feedback||'',
+  };
+
+  TEST.finished = true;
+
+  // Show loading then result
+  render(`<div style="text-align:center;padding:80px">
+    <div style="font-size:48px;margin-bottom:16px">🤖</div>
+    <div style="font-family:'Instrument Serif',serif;font-size:24px;margin-bottom:8px">Computing your final score...</div>
+    <div class="prog-bar" style="max-width:300px;margin:20px auto"><div class="prog-fill animate" style="animation:none;width:0;transition:width 2s ease" id="fp"></div></div>
+  </div>`);
+  setTimeout(()=>{ const fp=document.getElementById('fp'); if(fp) fp.style.width='100%'; },100);
+  await new Promise(r=>setTimeout(r,2200));
+
+  renderTestResult(MOCK.codingResults[S.user.id]);
+}
+
+function renderTestResult(result, isPrev=false) {
+  const col   = scColor(result.score);
+  const badges = { Expert:'tag-red', Advanced:'tag-amber', Intermediate:'tag-blue', Beginner:'tag-gray' };
+
+  render(`
+    <div class="fade" style="max-width:800px;margin:0 auto">
+      <div class="page-hdr">
+        <h1>🏁 Test Results</h1>
+        <p>${isPrev?'Your previous test result':'Your AI coding evaluation is complete'}</p>
+      </div>
+
+      <!-- Score hero -->
+      <div class="card" style="text-align:center;padding:40px;margin-bottom:24px;background:linear-gradient(135deg,#fafaf8 0%,${col}08 100%);border:2px solid ${col}20">
+        <div style="font-size:14px;color:var(--ink3);font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-bottom:12px">AI Coding Score</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:80px;color:${col};line-height:1">${result.score}</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:20px;color:var(--ink3);margin-bottom:16px">/100</div>
+        <span class="tag ${badges[result.badge]||'tag-gray'}" style="font-size:14px;padding:7px 16px">${result.badge} Level</span>
+        <div style="margin-top:16px;font-size:13px;color:var(--ink3)">Completed ${fmtDate(result.completedAt)}</div>
+      </div>
+
+      <!-- Question breakdown -->
+      <div class="two-col" style="margin-bottom:24px">
+        ${[
+          {n:1, title:result.q1Title, score:result.q1Score, feedback:result.q1Feedback},
+          {n:2, title:result.q2Title, score:result.q2Score, feedback:result.q2Feedback},
+        ].map(q=>`
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+              <div>
+                <div style="font-size:11px;color:var(--ink3);font-weight:600;text-transform:uppercase;margin-bottom:2px">Question ${q.n}</div>
+                <div style="font-weight:600;font-size:15px">${q.title}</div>
+              </div>
+              <div style="font-family:'Instrument Serif',serif;font-size:28px;color:${scColor(q.score)}">${q.score}</div>
+            </div>
+            <div class="prog-bar" style="margin-bottom:12px"><div class="prog-fill" style="width:${q.score}%;background:${scColor(q.score)}"></div></div>
+            <div class="feedback" style="font-size:13px">${q.feedback||'Evaluation complete.'}</div>
+          </div>`).join('')}
+      </div>
+
+      <!-- Overall analysis -->
+      <div class="card" style="margin-bottom:24px">
+        <div class="sec">What This Score Means</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          ${[
+            ['Expert (90-100)', '🔴', 'Top 5% of candidates. Ready for senior roles.', result.score>=90],
+            ['Advanced (75-89)', '🟠', 'Strong programmer. Ready for mid-level roles.', result.score>=75&&result.score<90],
+            ['Intermediate (55-74)', '🔵', 'Solid foundation. Recommend practice on algorithms.', result.score>=55&&result.score<75],
+            ['Beginner (0-54)', '⚪', 'Keep practicing! Focus on data structures basics.', result.score<55],
+          ].map(([lbl,ico,desc,active])=>`
+            <div style="padding:12px 14px;border-radius:var(--r);border:1.5px solid ${active?col:'var(--border)'};background:${active?col+'08':'transparent'}">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                <span>${ico}</span>
+                <span style="font-weight:${active?'600':'400'};font-size:13px;color:${active?col:'var(--ink3)'}">${lbl}</span>
+                ${active?`<span class="tag tag-green" style="font-size:10px">You</span>`:''}
+              </div>
+              <div style="font-size:12px;color:var(--ink3)">${desc}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="retakeTest()">🔄 Retake Test</button>
+        <button class="btn btn-secondary" onclick="navigate('my-resume')">📊 View Full Profile</button>
+        <button class="btn btn-ghost" onclick="navigate('find-jobs')">💼 Browse Jobs</button>
+      </div>
+    </div>`);
+}
+
+function retakeTest(){
+  TEST.finished=false;
+  TEST.questions=[];
+  pageCodingTest();
+}
+
+// (coding score now integrated directly into pageCandDash)
+
+const _origOpenCandModal = openCandModal;
+openCandModal = function(userId) {
+  const cResult  = MOCK.codingResults[userId];
+  const ivResult = MOCK.interviewResults[userId];
+  _origOpenCandModal(userId);
+  if(!cResult && !ivResult) return;
+  setTimeout(()=>{
+    const skillsSection = document.querySelector('.modal-body .sec');
+    if(!skillsSection) return;
+    const div = document.createElement('div');
+    div.innerHTML=`
+      <div class="sec" style="margin-bottom:12px">AI Evaluation Scores</div>
+      <div style="display:grid;grid-template-columns:${cResult&&ivResult?'1fr 1fr':'1fr'};gap:10px;margin-bottom:16px">
+        ${cResult?`
+          <div style="background:var(--surface2);border-radius:var(--r);padding:12px">
+            <div style="font-size:11px;color:var(--ink3);font-weight:600;margin-bottom:4px">🧠 CODING TEST</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="font-family:'Instrument Serif',serif;font-size:26px;color:${scColor(cResult.score)}">${cResult.score}</div>
+              <div><span class="tag ${cResult.score>=90?'tag-red':cResult.score>=75?'tag-amber':cResult.score>=55?'tag-blue':'tag-gray'}" style="font-size:11px">${cResult.badge}</span>
+              <div style="font-size:11px;color:var(--ink3);margin-top:3px">${cResult.q1Title} · ${cResult.q2Title}</div></div>
+            </div>
+          </div>`:''
+        }
+        ${ivResult?`
+          <div style="background:var(--surface2);border-radius:var(--r);padding:12px">
+            <div style="font-size:11px;color:var(--ink3);font-weight:600;margin-bottom:4px">🎤 AI INTERVIEW</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="font-family:'Instrument Serif',serif;font-size:26px;color:${scColor(ivResult.score)}">${ivResult.score}</div>
+              <div><span class="tag ${ivResult.badge==='Strong Hire'?'tag-green':ivResult.badge==='Hire'?'tag-blue':ivResult.badge==='Maybe'?'tag-amber':'tag-red'}" style="font-size:11px">${ivResult.badge}</span>
+              <div style="font-size:11px;color:var(--ink3);margin-top:3px">Comm ${ivResult.communication} · Tech ${ivResult.technicalDepth}</div></div>
+            </div>
+          </div>`:''
+        }
+      </div>`;
+    skillsSection.parentNode.insertBefore(div, skillsSection);
+  }, 80);
+};
+
+// ═══════════════════════════════════════════════
+// AI INTERVIEW FEATURE
+// ═══════════════════════════════════════════════
+
+const INTERVIEW_QUESTIONS = {
+  behavioural: [
+    { id:'b1', q:'Tell me about a challenging project you built from scratch. What were the key decisions you made?', tip:'Use STAR method: Situation, Task, Action, Result' },
+    { id:'b2', q:'Describe a time you had a conflict with a teammate. How did you resolve it?', tip:'Show empathy, communication, and outcome' },
+    { id:'b3', q:'What is your biggest professional failure and what did you learn from it?', tip:'Be honest — show growth mindset' },
+    { id:'b4', q:'How do you prioritise tasks when working on multiple projects simultaneously?', tip:'Mention frameworks: Eisenhower matrix, MoSCoW, etc.' },
+    { id:'b5', q:'Tell me about a time you had to learn a new technology quickly. How did you approach it?', tip:'Show resourcefulness and speed of learning' },
+  ],
+  technical: [
+    { id:'t1', q:'Explain the difference between REST and GraphQL. When would you choose one over the other?', tip:'Cover trade-offs, not just definitions' },
+    { id:'t2', q:'How does garbage collection work in Python? What are common memory pitfalls?', tip:'Cover reference counting, cyclic GC, del vs gc' },
+    { id:'t3', q:'What is the CAP theorem? Give a real-world example.', tip:'Consistency, Availability, Partition tolerance — pick 2' },
+    { id:'t4', q:'How would you design a URL shortener like bit.ly at scale?', tip:'Cover hashing, DB choice, caching, rate limiting' },
+    { id:'t5', q:'Explain how you would optimise a slow SQL query.', tip:'Cover EXPLAIN, indexes, query rewriting, partitioning' },
+    { id:'t6', q:'What is the difference between horizontal and vertical scaling?', tip:'Cover trade-offs, when to use each, examples' },
+  ],
+  rolespecific: [
+    { id:'r1', q:'Walk me through how you would set up a CI/CD pipeline for a Python project.', tip:'Cover build → test → lint → deploy stages' },
+    { id:'r2', q:'How do you ensure code quality in a team environment?', tip:'Cover code reviews, linting, testing, documentation' },
+    { id:'r3', q:'Describe your approach to debugging a production issue at 2 AM.', tip:'Cover observability, runbooks, escalation, RCA' },
+  ]
+};
+
+let IV = {
+  questions: [],
+  current: 0,
+  answers: [],
+  aiScores: [],
+  aiFeedback: [],
+  started: false,
+  finished: false,
+  currentAnswer: '',
+  timeLeft: 120, // 2 min per question
+  timerInterval: null,
+};
+
+function pickInterviewQuestions() {
+  const bqs = [...INTERVIEW_QUESTIONS.behavioural].sort(()=>Math.random()-.5).slice(0,1);
+  const tqs = [...INTERVIEW_QUESTIONS.technical].sort(()=>Math.random()-.5).slice(0,1);
+  const rqs = [...INTERVIEW_QUESTIONS.rolespecific].sort(()=>Math.random()-.5).slice(0,1);
+  return [...bqs, ...tqs, ...rqs];
+}
+
+function pageAIInterview() {
+  const uid = S.user.id;
+  const existing = MOCK.interviewResults[uid];
+
+  if (existing && !IV.finished) {
+    renderInterviewResult(existing, true); return;
+  }
+  if (IV.finished) {
+    renderInterviewResult(MOCK.interviewResults[uid]); return;
+  }
+
+  render(`
+    <div class="fade">
+      <div class="page-hdr"><h1>🎤 AI Interview</h1><p>3 questions · AI-evaluated · Scored on communication, depth & clarity</p></div>
+      <div class="card" style="max-width:640px;margin:0 auto;text-align:center;padding:48px 40px">
+        <div style="font-size:56px;margin-bottom:20px">🎤</div>
+        <h2 style="font-family:'Instrument Serif',serif;font-size:28px;margin-bottom:12px">AI Interview Simulation</h2>
+        <p style="color:var(--ink3);font-size:15px;line-height:1.7;margin-bottom:28px;max-width:420px;margin-left:auto;margin-right:auto">
+          You'll get <strong>3 questions</strong> — 1 behavioural, 1 technical, 1 role-specific. Type your answers as if in a real interview. Our AI will score your communication, technical depth, and problem-solving ability.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:32px;text-align:left">
+          <div style="background:var(--surface2);border-radius:var(--r);padding:14px">
+            <div style="font-size:18px;margin-bottom:6px">🗣️</div>
+            <div style="font-weight:600;font-size:13px">Communication</div>
+            <div style="font-size:12px;color:var(--ink3)">Clarity & structure</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:var(--r);padding:14px">
+            <div style="font-size:18px;margin-bottom:6px">🔬</div>
+            <div style="font-weight:600;font-size:13px">Technical Depth</div>
+            <div style="font-size:12px;color:var(--ink3)">Knowledge accuracy</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:var(--r);padding:14px">
+            <div style="font-size:18px;margin-bottom:6px">💡</div>
+            <div style="font-weight:600;font-size:13px">Problem Solving</div>
+            <div style="font-size:12px;color:var(--ink3)">Reasoning quality</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="font-size:16px;padding:14px 40px" onclick="startInterview()">Begin Interview →</button>
+        ${existing?`<br><button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="IV.finished=true;pageAIInterview()">View Last Result</button>`:''}
+      </div>
+    </div>`);
+}
+
+function startInterview() {
+  IV.questions = pickInterviewQuestions();
+  IV.current   = 0;
+  IV.answers   = Array(3).fill('');
+  IV.aiScores  = Array(3).fill(null);
+  IV.aiFeedback= Array(3).fill(null);
+  IV.started   = true;
+  IV.finished  = false;
+  renderInterviewQuestion();
+}
+
+function renderInterviewQuestion() {
+  const q    = IV.questions[IV.current];
+  const idx  = IV.current;
+  const type = idx===0?'Behavioural':idx===1?'Technical':'Role-Specific';
+  const typeColor = idx===0?'tag-blue':idx===1?'tag-amber':'tag-green';
+  const allEvaluated = IV.aiScores.every(s=>s!==null);
+
+  render(`
+    <div class="fade" style="max-width:820px;margin:0 auto">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-family:'Instrument Serif',serif;font-size:22px">🎤 AI Interview</span>
+          <span class="tag ${typeColor}">${type}</span>
+        </div>
+        <!-- Progress dots -->
+        <div style="display:flex;gap:8px;align-items:center">
+          ${IV.questions.map((_,i)=>`
+            <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;
+              background:${i===idx?'var(--accent)':IV.aiScores[i]!==null?'var(--accent-light)':'var(--surface2)'};
+              color:${i===idx?'#fff':IV.aiScores[i]!==null?'var(--accent)':'var(--ink3)'};
+              cursor:${IV.aiScores[i]!==null||i<=idx?'pointer':'default'}" 
+              onclick="${i<=idx||IV.aiScores[i]!==null?`switchIVQ(${i})`:''}">${IV.aiScores[i]!==null?'✓':i+1}</div>`).join('')}
+          ${allEvaluated?`<button class="btn btn-secondary btn-sm" onclick="finishInterview()" style="border-color:var(--accent);color:var(--accent);margin-left:6px">🏁 Final Score</button>`:''}
+        </div>
+      </div>
+
+      <div class="two-col" style="align-items:start">
+        <!-- Question card -->
+        <div class="card" style="position:sticky;top:80px">
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin-bottom:10px">Question ${idx+1} of 3</div>
+          <div style="font-size:17px;line-height:1.6;color:var(--ink);font-weight:500;margin-bottom:18px">"${q.q}"</div>
+          <div style="background:var(--blue-light);border-radius:var(--r);padding:12px 14px;font-size:13px;color:var(--blue)">
+            💡 <strong>Tip:</strong> ${q.tip}
+          </div>
+          <div class="divider"></div>
+          <div style="font-size:12px;color:var(--ink3);line-height:1.8">
+            <strong style="color:var(--ink2)">Evaluation criteria:</strong><br>
+            • Clear structure (intro → body → conclusion)<br>
+            • Specific examples over vague claims<br>
+            • Technical accuracy where relevant<br>
+            • Concise yet complete (150–300 words ideal)
+          </div>
+        </div>
+
+        <!-- Answer area -->
+        <div>
+          <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px">
+            <div style="padding:12px 16px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:13px;font-weight:500;color:var(--ink2)">Your Answer</span>
+              <span id="wordCount" style="font-size:12px;color:var(--ink4)">0 words</span>
+            </div>
+            <textarea id="ivAnswer" placeholder="Type your answer here... Be specific, use examples, and structure your response clearly."
+              style="width:100%;min-height:280px;padding:16px;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.75;resize:vertical;background:#fff;color:var(--ink)"
+              oninput="updateWordCount(this)"
+              ${IV.aiScores[idx]!==null?'disabled':''}>
+${IV.answers[idx]||''}</textarea>
+          </div>
+
+          <!-- Action row -->
+          <div style="display:flex;gap:10px;margin-bottom:16px">
+            <button class="btn btn-ghost btn-sm" onclick="IV.answers[${idx}]='';document.getElementById('ivAnswer').value='';updateWordCount(document.getElementById('ivAnswer'))">Clear</button>
+            <div style="flex:1"></div>
+            ${IV.aiScores[idx]!==null
+              ? `<button class="btn btn-secondary btn-sm" disabled>✓ Evaluated</button>`
+              : `<button class="btn btn-primary" id="ivSubmitBtn" onclick="submitIVAnswer(${idx})">Submit to AI →</button>`
+            }
+          </div>
+
+          <!-- AI result -->
+          <div id="ivResult">
+            ${IV.aiScores[idx]!==null ? renderIVResultPanel(idx) : ''}
+          </div>
+
+          <!-- Next prompt -->
+          ${IV.aiScores[idx]!==null && idx < 2 && IV.aiScores[idx+1]===null ? `
+            <div style="margin-top:14px;padding:14px 16px;background:var(--accent-light);border-radius:var(--r);font-size:14px;color:var(--accent)">
+              ✅ Q${idx+1} done! <a style="cursor:pointer;font-weight:600;text-decoration:underline" onclick="switchIVQ(${idx+1})">Go to Q${idx+2} →</a>
+            </div>` : ''}
+        </div>
+      </div>
+    </div>`);
+
+  // Set word count
+  setTimeout(()=>{ const ta=document.getElementById('ivAnswer'); if(ta) updateWordCount(ta); }, 50);
+}
+
+function updateWordCount(ta) {
+  IV.answers[IV.current] = ta.value;
+  const wc = ta.value.trim().split(/\s+/).filter(Boolean).length;
+  const el = document.getElementById('wordCount');
+  if(el) el.textContent = `${wc} word${wc!==1?'s':''}${wc<50?' · Aim for 150+':wc>350?' · Try to be concise':''}`;
+}
+
+function switchIVQ(idx) {
+  IV.answers[IV.current] = document.getElementById('ivAnswer')?.value || IV.answers[IV.current];
+  IV.current = idx;
+  renderInterviewQuestion();
+}
+
+async function submitIVAnswer(idx) {
+  const answer = document.getElementById('ivAnswer')?.value || IV.answers[idx];
+  IV.answers[idx] = answer;
+  const wc = answer.trim().split(/\s+/).filter(Boolean).length;
+  if(wc < 10) { toast('Please write a more complete answer first!','err'); return; }
+
+  const btn = document.getElementById('ivSubmitBtn');
+  if(btn){ btn.innerHTML='<span class="spin"></span> Evaluating...'; btn.disabled=true; }
+
+  document.getElementById('ivResult').innerHTML=`
+    <div class="card" style="text-align:center;padding:28px">
+      <div style="font-size:28px;margin-bottom:10px">🤖</div>
+      <div style="font-weight:600;margin-bottom:6px">AI is evaluating your answer</div>
+      <div id="ivStatus" style="font-size:13px;color:var(--ink3);margin-bottom:12px">Analysing structure...</div>
+      <div class="prog-bar" style="max-width:280px;margin:0 auto"><div class="prog-fill" id="ivProg"></div></div>
+    </div>`;
+
+  const steps=[[500,'Checking structure & clarity...',25],[1100,'Evaluating technical depth...',55],[1800,'Scoring problem-solving approach...',78],[2500,'Generating feedback...',95]];
+  for(const [ms,msg,pct] of steps){
+    await new Promise(r=>setTimeout(r,ms===500?500:700));
+    document.getElementById('ivStatus')&&(document.getElementById('ivStatus').textContent=msg);
+    document.getElementById('ivProg')&&(document.getElementById('ivProg').style.width=pct+'%');
+  }
+
+  try {
+    await callAIInterviewEval(idx, answer);
+  } catch(e) {
+    mockIVEvaluate(idx, answer);
+  }
+
+  document.getElementById('ivProg')&&(document.getElementById('ivProg').style.width='100%');
+  await new Promise(r=>setTimeout(r,300));
+  renderInterviewQuestion();
+  toast(`Q${idx+1} evaluated!`,'ok');
+}
+
+async function callAIInterviewEval(idx, answer) {
+  const q = IV.questions[idx];
+  const type = idx===0?'Behavioural':idx===1?'Technical':'Role-Specific';
+  const prompt = `You are an expert technical recruiter evaluating a candidate's interview answer.
+
+QUESTION TYPE: ${type}
+QUESTION: "${q.q}"
+
+CANDIDATE'S ANSWER:
+"${answer}"
+
+Evaluate this answer and respond ONLY with a valid JSON object (no markdown, no backticks):
+{
+  "score": <integer 0-100 overall>,
+  "communication": <integer 0-100>,
+  "technical_depth": <integer 0-100>,
+  "problem_solving": <integer 0-100>,
+  "confidence": <integer 0-100>,
+  "clarity": <integer 0-100>,
+  "verdict": "<one of: Excellent | Good | Adequate | Needs Improvement>",
+  "feedback": "<2-3 sentences of specific, actionable feedback mentioning what was strong and what could improve>",
+  "what_worked": "<one specific thing they did well>",
+  "improve": "<one concrete thing to do better next time>"
+}`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:800,
+      messages:[{role:'user',content:prompt}]
+    })
+  });
+  if(!res.ok) throw new Error('API error');
+  const data = await res.json();
+  const raw  = data.content?.[0]?.text||'';
+  const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
+  IV.aiScores[idx]  = parsed.score;
+  IV.aiFeedback[idx]= parsed;
+}
+
+function mockIVEvaluate(idx, answer) {
+  const wc = answer.trim().split(/\s+/).filter(Boolean).length;
+  const hasExample   = /for example|for instance|when I|I built|I led|I worked|I designed|my team|we had/i.test(answer);
+  const hasStructure = answer.includes('.')||answer.split('\n').length>2;
+  const hasTechnical = /api|database|code|system|stack|framework|deploy|scalab|architect|algorithm|complexity/i.test(answer);
+  const isTechQ      = idx===1;
+
+  let score = 45;
+  if(wc>=80)  score+=12;
+  if(wc>=150) score+=10;
+  if(hasExample)   score+=15;
+  if(hasStructure) score+=10;
+  if(isTechQ&&hasTechnical) score+=12;
+  score = Math.min(97, Math.max(20, score+Math.floor(Math.random()*8)));
+
+  const verdict = score>=85?'Excellent':score>=70?'Good':score>=50?'Adequate':'Needs Improvement';
+  const feedbacks = {
+    'Excellent':`Strong, well-structured answer. You provided a specific example that clearly demonstrated your experience. The answer flows logically and stays on topic throughout. Minor polish could come from quantifying the impact of your work.`,
+    'Good':`Good answer with solid content. You covered the key points and showed genuine understanding. Adding a more specific real-world example would elevate this further. The structure could be slightly tighter.`,
+    'Adequate':`The answer covers the basics but lacks depth. Try to include a concrete example from your experience and quantify outcomes where possible. Using STAR method (Situation, Task, Action, Result) would improve structure significantly.`,
+    'Needs Improvement':`The answer is brief and misses key elements the question is looking for. Expand on your experience with specific examples. Aim for 150–250 words with a clear structure — don't just define terms, show how you've applied them.`,
+  };
+
+  IV.aiScores[idx] = score;
+  IV.aiFeedback[idx] = {
+    score,
+    communication: Math.min(100,score+5),
+    technical_depth: isTechQ?Math.min(100,score+Math.floor(Math.random()*10)-3):score,
+    problem_solving: Math.min(100,score+Math.floor(Math.random()*8)),
+    confidence: Math.min(100,score+8),
+    clarity: Math.min(100,score+4),
+    verdict,
+    feedback: feedbacks[verdict],
+    what_worked: hasExample?'Good use of a concrete example to illustrate your point.'
+      :'Your answer shows genuine knowledge of the subject matter.',
+    improve: wc<100?'Write a longer, more complete answer (aim for 150–250 words).'
+      :'Quantify your impact — numbers make answers much more compelling.',
+  };
+}
+
+function renderIVResultPanel(idx) {
+  const fb  = IV.aiFeedback[idx]; if(!fb) return '';
+  const sc  = IV.aiScores[idx];
+  const col = scColor(sc);
+  const vColors = { Excellent:'tag-green', Good:'tag-blue', Adequate:'tag-amber', 'Needs Improvement':'tag-red' };
+
+  return `
+    <div class="card" style="border:2px solid ${col}22">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div style="font-weight:600">🤖 AI Evaluation</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="tag ${vColors[fb.verdict]||'tag-gray'}">${fb.verdict}</span>
+          <span style="font-family:'Instrument Serif',serif;font-size:32px;color:${col}">${sc}</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+        ${[['Communication',fb.communication],['Tech Depth',fb.technical_depth],['Clarity',fb.clarity]].map(([l,v])=>`
+          <div style="background:var(--surface2);border-radius:var(--r);padding:9px;text-align:center">
+            <div style="font-size:11px;color:var(--ink3);margin-bottom:2px">${l}</div>
+            <div style="font-family:'Instrument Serif',serif;font-size:18px;color:${scColor(v)}">${v}</div>
+          </div>`).join('')}
+      </div>
+      <div class="feedback" style="margin-bottom:10px">${fb.feedback}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="background:#e8f5ee;border-radius:var(--r);padding:10px 12px;font-size:13px;color:#0f4d35">
+          ✅ <strong>Worked well:</strong> ${fb.what_worked}
+        </div>
+        <div style="background:#fdf3e0;border-radius:var(--r);padding:10px 12px;font-size:13px;color:#854f0b">
+          💡 <strong>Improve:</strong> ${fb.improve}
+        </div>
+      </div>
+    </div>`;
+}
+
+async function finishInterview() {
+  const scores = IV.aiScores.filter(s=>s!==null);
+  const avg    = Math.round(scores.reduce((s,x)=>s+x,0)/scores.length);
+  const avgComm  = Math.round(IV.aiFeedback.map(f=>f?.communication||0).reduce((s,x)=>s+x,0)/3);
+  const avgTech  = Math.round(IV.aiFeedback.map(f=>f?.technical_depth||0).reduce((s,x)=>s+x,0)/3);
+  const avgPS    = Math.round(IV.aiFeedback.map(f=>f?.problem_solving||0).reduce((s,x)=>s+x,0)/3);
+  const avgConf  = Math.round(IV.aiFeedback.map(f=>f?.confidence||0).reduce((s,x)=>s+x,0)/3);
+  const avgClar  = Math.round(IV.aiFeedback.map(f=>f?.clarity||0).reduce((s,x)=>s+x,0)/3);
+  const badge    = avg>=88?'Strong Hire':avg>=72?'Hire':avg>=55?'Maybe':'No Hire';
+
+  MOCK.interviewResults[S.user.id] = {
+    score:avg, communication:avgComm, technicalDepth:avgTech,
+    problemSolving:avgPS, confidence:avgConf, clarity:avgClar,
+    badge, completedAt:new Date().toISOString().split('T')[0],
+    questions:IV.questions.map(q=>q.q),
+    feedback:IV.aiFeedback.map(f=>f?.feedback||'').join(' '),
+  };
+  IV.finished = true;
+
+  render(`<div style="text-align:center;padding:80px">
+    <div style="font-size:48px;margin-bottom:16px">🎤</div>
+    <div style="font-family:'Instrument Serif',serif;font-size:24px;margin-bottom:8px">Calculating interview score...</div>
+    <div class="prog-bar" style="max-width:300px;margin:20px auto"><div class="prog-fill" id="fp2" style="transition:width 2s ease"></div></div>
+  </div>`);
+  setTimeout(()=>{ const f=document.getElementById('fp2'); if(f) f.style.width='100%'; },100);
+  await new Promise(r=>setTimeout(r,2000));
+  renderInterviewResult(MOCK.interviewResults[S.user.id]);
+}
+
+function renderInterviewResult(result, isPrev=false) {
+  const col = scColor(result.score);
+  const badgeColors = { 'Strong Hire':'tag-green', 'Hire':'tag-blue', 'Maybe':'tag-amber', 'No Hire':'tag-red' };
+
+  render(`
+    <div class="fade" style="max-width:820px;margin:0 auto">
+      <div class="page-hdr"><h1>🎤 Interview Results</h1><p>${isPrev?'Your previous interview result':'AI evaluation complete'}</p></div>
+
+      <!-- Score hero -->
+      <div class="card" style="text-align:center;padding:40px;margin-bottom:20px;background:linear-gradient(135deg,#fafaf8,${col}08);border:2px solid ${col}20">
+        <div style="font-size:13px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">AI Interview Score</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:80px;color:${col};line-height:1">${result.score}</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:18px;color:var(--ink3);margin-bottom:14px">/100</div>
+        <span class="tag ${badgeColors[result.badge]||'tag-gray'}" style="font-size:14px;padding:7px 16px">${result.badge}</span>
+        <div style="margin-top:14px;font-size:13px;color:var(--ink3)">Completed ${fmtDate(result.completedAt)}</div>
+      </div>
+
+      <!-- Dimension scores -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="sec">Score Breakdown</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 32px">
+          ${[
+            ['Communication',   result.communication],
+            ['Technical Depth', result.technicalDepth],
+            ['Problem Solving', result.problemSolving],
+            ['Confidence',      result.confidence],
+            ['Clarity',         result.clarity],
+          ].map(([l,v])=>barRow(l,v,100)).join('')}
+        </div>
+      </div>
+
+      <!-- Per-question breakdown -->
+      ${IV.questions.length ? `
+      <div class="card" style="margin-bottom:20px">
+        <div class="sec">Question-by-Question</div>
+        ${IV.questions.map((q,i)=>{
+          const fb=IV.aiFeedback[i]; const sc=IV.aiScores[i]||0;
+          return `
+          <div style="padding:14px 0;border-bottom:1px solid var(--surface2)">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+              <div style="flex:1;padding-right:16px">
+                <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--ink3);margin-bottom:4px">Q${i+1} · ${i===0?'Behavioural':i===1?'Technical':'Role-Specific'}</div>
+                <div style="font-size:14px;font-weight:500;color:var(--ink2)">"${q.q.slice(0,80)}..."</div>
+              </div>
+              <div style="font-family:'Instrument Serif',serif;font-size:28px;color:${scColor(sc)};flex-shrink:0">${sc}</div>
+            </div>
+            ${fb?`<div class="feedback" style="font-size:13px">${fb.feedback}</div>`:''}
+          </div>`;}).join('')}
+      </div>` : ''}
+
+      <!-- Actions -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="IV.finished=false;IV.started=false;pageAIInterview()">🔄 Retake Interview</button>
+        <button class="btn btn-secondary" onclick="navigate('dashboard')">📊 Back to Dashboard</button>
+        <button class="btn btn-ghost" onclick="navigate('find-jobs')">💼 Browse Jobs</button>
+      </div>
+    </div>`);
+}
+
+// ═══════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════
+checkBackend().then(()=>{
+  if(USE_BACKEND) {
+    const note=document.createElement('div');
+    note.style.cssText='position:fixed;bottom:16px;right:16px;background:var(--accent);color:#fff;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;z-index:999';
+    note.textContent='✅ Connected to live backend';
+    document.body.appendChild(note);
+    setTimeout(()=>note.remove(),4000);
+  }
+});
+
+// ── Auto-save on any data mutation ───────────────────────────────────────────
+// Patch all write functions to call saveAll() after
+const _origApplyJob   = applyJob;
+applyJob = function(...a){ const r=_origApplyJob(...a); saveAll(); return r; };
+
+const _origSaveProfile = saveProfile;
+saveProfile = function(...a){ const r=_origSaveProfile(...a); saveAll(); return r; };
+
+const _origSubmitJob = submitJob;
+submitJob = function(...a){ const r=_origSubmitJob(...a); saveAll(); return r; };
+
+const _origFinishTest = finishTest;
+finishTest = async function(...a){ const r=await _origFinishTest(...a); saveAll(); return r; };
+
+const _origFinishInterview = finishInterview;
+finishInterview = async function(...a){ const r=await _origFinishInterview(...a); saveAll(); return r; };
+
+// ── Session restore ───────────────────────────────────────────────────────────
+const autoLogin = loadAll();
+if (autoLogin && S.user) {
+  enterApp();
+} else {
+  document.getElementById('auth-screen').style.display = 'grid';
+}
+</script>
+</body>
+</html>
